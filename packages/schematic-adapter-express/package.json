@@ -1,6 +1,6 @@
 {
   "name": "@congruentv/schematic-adapter-express",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Typescript schema-first tooling for modern typed REST APIs and Ops.",
   "keywords": [],
   "author": "congruentv",
@@ -29,6 +29,10 @@
     "@congruentv/schematic": "workspace:*"
   },
   "devDependencies": {
-    "@types/express": "catalog:"
+    "@types/express": "catalog:",
+    "pkgroll": "catalog:"
+  },
+  "scripts": {
+    "build": "pkgroll --clean-dist"
   }
 }

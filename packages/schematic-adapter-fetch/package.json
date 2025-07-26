@@ -1,6 +1,6 @@
 {
   "name": "@congruentv/schematic-adapter-fetch",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Typescript schema-first tooling for modern typed REST APIs and Ops.",
   "keywords": [],
   "author": "congruentv",
@@ -11,16 +11,17 @@
     "dist"
   ],
   "exports": {
-    ".": {
-      "import": "./src/index.ts"
-    }
+    "import": "./src/index.ts"
   },
   "publishConfig": {
     "exports": {
-      ".": {
-        "import": "./dist/index.esm.js",
-        "require": "./dist/index.cjs.js",
-        "types": "./dist/index.d.ts"
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      },
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
       }
     }
   },
@@ -29,6 +30,10 @@
     "express": "catalog:"
   },
   "devDependencies": {
-    "@types/express": "catalog:"
+    "@types/express": "catalog:",
+    "pkgroll": "catalog:"
+  },
+  "scripts": {
+    "build": "pkgroll --clean-dist"
   }
 }
