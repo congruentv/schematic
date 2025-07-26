@@ -26,10 +26,15 @@
     }
   },
   "peerDependencies": {
-    "@congruentv/schematic": "workspace:*"
+    "@congruentv/schematic": "workspace:*",
+    "@types/express": "catalog:",
+    "express": "catalog:"
   },
   "devDependencies": {
+    "@types/body-parser": "catalog:",
+    "@types/cors": "catalog:",
     "@types/express": "catalog:",
+    "express": "catalog:",
     "pkgroll": "catalog:"
   },
   "scripts": {
