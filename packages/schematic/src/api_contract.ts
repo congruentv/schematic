@@ -11,12 +11,9 @@ function isApiContractDefinition(obj: any): obj is IApiContractDefinition {
 }
 
 export class ApiContract<const TDef extends IApiContractDefinition> {
-  private __DEF__: TDef;
   
   /** @internal */
-  get _DEFINITION(): TDef {
-    return this.__DEF__;
-  }
+  __DEF__: TDef;
   
   constructor(definition: TDef) {
     this.__DEF__ = definition;
