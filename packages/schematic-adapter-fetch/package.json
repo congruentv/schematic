@@ -26,11 +26,9 @@
     }
   },
   "peerDependencies": {
-    "@congruentv/schematic": "workspace:*",
-    "express": "catalog:"
+    "@congruentv/schematic": "workspace:*"
   },
   "devDependencies": {
-    "@types/express": "catalog:",
     "pkgroll": "catalog:"
   },
   "scripts": {

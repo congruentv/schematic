@@ -173,13 +173,7 @@ importers:
       '@congruentv/schematic':
         specifier: workspace:*
         version: link:../schematic
-      express:
-        specifier: 'catalog:'
-        version: 5.1.0
     devDependencies:
-      '@types/express':
-        specifier: 'catalog:'
-        version: 5.0.3
       pkgroll:
         specifier: 'catalog:'
         version: 2.14.5(typescript@5.8.3)
