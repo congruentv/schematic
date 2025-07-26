@@ -1,0 +1,9 @@
+{
+  "name": "@congruentv/schematic-monorepo",
+  "version": "0.0.1",
+  "description": "Typescript schema-first tooling for modern typed REST APIs and Ops.",
+  "keywords": [],
+  "author": "congruentv",
+  "license": "MIT",
+  "packageManager": "pnpm@10.13.1"
+}

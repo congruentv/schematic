@@ -1,0 +1,33 @@
+{
+  "name": "@congruentv/schematic-adapter-express",
+  "version": "0.0.1",
+  "description": "Typescript schema-first tooling for modern typed REST APIs and Ops.",
+  "keywords": [],
+  "author": "congruentv",
+  "license": "MIT",
+  "packageManager": "pnpm@10.13.1",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./src/index.ts"
+    }
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "import": "./dist/index.esm.js",
+        "require": "./dist/index.cjs.js",
+        "types": "./dist/index.d.ts"
+      }
+    }
+  },
+  "peerDependencies": {
+    "@congruentv/schematic": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/express": "catalog:"
+  }
+}
