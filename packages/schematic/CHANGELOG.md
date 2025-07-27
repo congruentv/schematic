@@ -1,5 +1,11 @@
 # @congruentv/schematic
 
+## 0.2.0
+
+### Minor Changes
+
+- Removed const around HttpStatusCode
+
 ## 0.1.0
 
 ### Minor Changes

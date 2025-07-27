@@ -5,7 +5,7 @@
 //   | 400 | 401 | 403 | 404 | 409
 //   | 500 | 501 | 502 | 503 | 504;
 
-export const enum HttpStatusCode {
+export enum HttpStatusCode {
   Continue_100 = 100,
   SwitchingProtocols_101 = 101,
   OK_200 = 200,

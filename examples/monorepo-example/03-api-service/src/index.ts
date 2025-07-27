@@ -3,6 +3,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 
 import { ApiHandlersRegistrar } from '@congruentv/schematic';
+import { HttpStatusCode } from '@congruentv/schematic';
 import { configureEndpoint } from '@congruentv/schematic-adapter-express';
 
 import { 
@@ -28,7 +29,7 @@ const pokemonApi = new ApiHandlersRegistrar(pokemonApiContract);
 
 configureEndpoint(app, pokemonApi.pokemon.GET, async ({ query }) => {
   return {
-    code: 200,
+    code: HttpStatusCode.OK_200,
     payload: {
       list: pokemons.slice(query.skip, query.take + query.skip),
       total: pokemons.length,
@@ -39,9 +40,9 @@ configureEndpoint(app, pokemonApi.pokemon.GET, async ({ query }) => {
 configureEndpoint(app, pokemonApi.pokemon[':id'].GET, async ({ pathParams }) => {
   const pokemon = pokemons.find(p => p.id.toString() === pathParams.id);
   if (!pokemon) {
-    return { code: 404, payload: { userMessage: `Pokemon with ID ${pathParams.id} not found` } };
+    return { code: HttpStatusCode.NotFound_404, payload: { userMessage: `Pokemon with ID ${pathParams.id} not found` } };
   }
-  return { code: 200, payload: pokemon };
+  return { code: HttpStatusCode.OK_200, payload: pokemon };
 });
 
 configureEndpoint(app, pokemonApi.pokemon.POST, async ({ body }) => {
@@ -51,7 +52,7 @@ configureEndpoint(app, pokemonApi.pokemon.POST, async ({ body }) => {
   };
   pokemons.push(newPokemon);
   return {
-    code: 201,
+    code: HttpStatusCode.Created_201,
     payload: newPokemon,
   };
 });
