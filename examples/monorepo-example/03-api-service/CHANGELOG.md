@@ -1,0 +1,10 @@
+# @monorepo-example/api-service
+
+## 0.0.2
+
+### Patch Changes
+
+- Updated dependencies
+  - @congruentv/schematic-adapter-express@0.1.0
+  - @congruentv/schematic@0.1.0
+  - @monorepo-example/contract@0.0.2

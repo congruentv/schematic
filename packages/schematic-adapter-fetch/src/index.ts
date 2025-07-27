@@ -2,7 +2,7 @@ import {
   ApiClient, 
   type IApiContractDefinition, 
   ApiContract, 
-  type StatusCode 
+  type HttpStatusCode 
 } from '@congruentv/schematic';
 
 export interface IClientOptions {
@@ -26,7 +26,7 @@ export function createClient<TDef extends IApiContractDefinition>(contract: ApiC
       headers,
       body,
     });
-    const code = response.status as StatusCode;
+    const code = response.status as HttpStatusCode;
     const payload = await response.json();
     return {
       code,

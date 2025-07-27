@@ -1,6 +1,6 @@
 {
   "name": "@congruentv/schematic",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Typescript schema-first tooling for modern typed REST APIs and Ops.",
   "keywords": [],
   "author": "congruentv",

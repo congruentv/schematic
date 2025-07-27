@@ -1,2 +1,2 @@
-export type Method = "ALL" | "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "OPTIONS" | "HEAD";
-export type LowerCasedMethod = Lowercase<Method>;
+export type HttpMethod = "ALL" | "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "OPTIONS" | "HEAD";
+export type LowerCasedHttpMethod = Lowercase<HttpMethod>;

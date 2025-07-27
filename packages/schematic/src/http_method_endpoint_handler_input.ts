@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { IMethodEndpointDefinition } from "./http_method_endpoint.js";
-import { Method } from "./http_method_type.js";
+import { IHttpMethodEndpointDefinition } from "./http_method_endpoint.js";
+import { HttpMethod } from "./http_method_type.js";
 
-export type MethodEndpointHandlerInput<TEndpointDefinition extends IMethodEndpointDefinition> = {
-  method: Method;
+export type HttpMethodEndpointHandlerInput<TEndpointDefinition extends IHttpMethodEndpointDefinition> = {
+  method: HttpMethod;
   pathSegments: readonly string[];
   path: string;
   genericPath: string;
@@ -13,8 +13,8 @@ export type MethodEndpointHandlerInput<TEndpointDefinition extends IMethodEndpoi
   body: TEndpointDefinition['body'] extends z.ZodType ? z.infer<TEndpointDefinition['body']> : null;
 };
 
-export type ClientMethodEndpointHandlerInput = {
-  method: Method;
+export type ClientHttpMethodEndpointHandlerInput = {
+  method: HttpMethod;
   pathSegments: readonly string[];
   path: string;
   genericPath: string;

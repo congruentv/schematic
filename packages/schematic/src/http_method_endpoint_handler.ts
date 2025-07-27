@@ -1,9 +1,9 @@
-import { IMethodEndpointDefinition } from "./http_method_endpoint.js";
-import { ClientMethodEndpointHandlerInput, MethodEndpointHandlerInput } from "./http_method_endpoint_handler_input.js";
-import { ClientMethodEndpointHandlerOutput, MethodEndpointHandlerOutput } from "./http_method_endpoint_handler_output.js";
+import { IHttpMethodEndpointDefinition } from "./http_method_endpoint.js";
+import { ClientHttpMethodEndpointHandlerInput, HttpMethodEndpointHandlerInput } from "./http_method_endpoint_handler_input.js";
+import { ClientHttpMethodEndpointHandlerOutput, HttpMethodEndpointHandlerOutput } from "./http_method_endpoint_handler_output.js";
 
-export type MethodEndpointHandler<TEndpointDefinition extends IMethodEndpointDefinition> = 
-  (input: MethodEndpointHandlerInput<TEndpointDefinition>) => Promise<MethodEndpointHandlerOutput<TEndpointDefinition>>;
+export type HttpMethodEndpointHandler<TDef extends IHttpMethodEndpointDefinition> = 
+  (input: HttpMethodEndpointHandlerInput<TDef>) => Promise<HttpMethodEndpointHandlerOutput<TDef>>;
 
-export type ClientMethodEndpointHandler = 
-  (input: ClientMethodEndpointHandlerInput) => Promise<ClientMethodEndpointHandlerOutput>;
+export type ClientHttpMethodEndpointHandler = 
+  (input: ClientHttpMethodEndpointHandlerInput) => Promise<ClientHttpMethodEndpointHandlerOutput>;

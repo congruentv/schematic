@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import { HttpStatusCode } from '@congruentv/schematic';
 import { createClient } from '@congruentv/schematic-adapter-fetch';
 import { pokemonApiContract } from '@monorepo-example/contract';
 
@@ -15,7 +16,7 @@ function App() {
   useEffect(() => {
     client.pokemon.id(count).GET()
       .then(response => {
-        if (response.code === 200) {
+        if (response.code === HttpStatusCode.OK_200) {
           setPokemonName(response.payload.name);
         } else {
           setPokemonName('Pokemon not found');

@@ -1,7 +1,7 @@
 import { ApiContract, IApiContractDefinition } from "./api_contract.js";
-import { MethodCallFunc,  } from './api_client_http_method_call.js';
-import { MethodEndpoint } from './http_method_endpoint.js';
-import { ClientMethodEndpointHandler } from "./http_method_endpoint_handler.js";
+import { HttpMethodCallFunc,  } from './api_client_http_method_call.js';
+import { HttpMethodEndpoint } from './http_method_endpoint.js';
+import { ClientHttpMethodEndpointHandler } from "./http_method_endpoint_handler.js";
 
 export type PathParamFunc<TDef> = (value: string | number) => TDef;
 
@@ -19,7 +19,7 @@ class InnerApiClient<TDef extends IApiContractDefinition> {
   /** @internal */
   __CONTEXT__: IClientContext;
 
-  constructor(contract: ApiContract<TDef>, clientGenericHandler: ClientMethodEndpointHandler) {
+  constructor(contract: ApiContract<TDef>, clientGenericHandler: ClientHttpMethodEndpointHandler) {
     const clonedDefinition = contract._cloneDefinition();
 
     const proto = { ...InnerApiClient.prototype };
@@ -41,7 +41,7 @@ class InnerApiClient<TDef extends IApiContractDefinition> {
   private static _implement<TDef extends IApiContractDefinition>(
     client: InnerApiClient<TDef>,
     currObj: any, 
-    clientGenericHandler: ClientMethodEndpointHandler
+    clientGenericHandler: ClientHttpMethodEndpointHandler
   ): void {
     for (const key of Object.keys(currObj)) {
       if (key === '__CONTEXT__') {
@@ -56,7 +56,7 @@ class InnerApiClient<TDef extends IApiContractDefinition> {
         });
         delete currObj[key];
         InnerApiClient._implement(client, val, clientGenericHandler);
-      } else if (val instanceof MethodEndpoint) {
+      } else if (val instanceof HttpMethodEndpoint) {
         currObj[key] = (req: never | { 
           query: Record<string, any>; 
           body: any 
@@ -127,8 +127,8 @@ export type ApiClientDef<ObjType extends object> = {
         ? PathParamFunc<ApiClientDef<ObjType[Key]>>
         : never
       // 3) else if it’s a MethodEndpoint<Def>, pull out Def…
-      : ObjType[Key] extends MethodEndpoint<infer TMethodEndpointDef>
-        ? MethodCallFunc<TMethodEndpointDef>
+      : ObjType[Key] extends HttpMethodEndpoint<infer TMethodEndpointDef>
+        ? HttpMethodCallFunc<TMethodEndpointDef>
         // 4) else if it’s another nested object, recurse…
         : ObjType[Key] extends object
           ? ApiClientDef<ObjType[Key]>
@@ -137,4 +137,4 @@ export type ApiClientDef<ObjType extends object> = {
 };
 
 export type ApiClient<TDef extends IApiContractDefinition> = ApiClientDef<InnerApiClient<TDef> & TDef>;
-export const ApiClient: new <TDef extends IApiContractDefinition>(contract: ApiContract<TDef>, clientGenericHandler: ClientMethodEndpointHandler) => ApiClient<TDef> = InnerApiClient as any;
+export const ApiClient: new <TDef extends IApiContractDefinition>(contract: ApiContract<TDef>, clientGenericHandler: ClientHttpMethodEndpointHandler) => ApiClient<TDef> = InnerApiClient as any;

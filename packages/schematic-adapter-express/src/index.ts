@@ -1,19 +1,19 @@
 import { Express } from 'express';
 import { 
-  MethodEndpointHandler,
+  HttpMethodEndpointHandler,
   MethodEndpointHandlerContainer, 
-  IMethodEndpointDefinition,
-  type LowerCasedMethod
+  IHttpMethodEndpointDefinition,
+  type LowerCasedHttpMethod
 } from '@congruentv/schematic';
 
-export function configureEndpoint<const TDef extends IMethodEndpointDefinition>(
+export function configureEndpoint<const TDef extends IHttpMethodEndpointDefinition>(
   app: Express, 
   endpointContainer: MethodEndpointHandlerContainer<TDef>,
-  handler: MethodEndpointHandler<TDef>
+  handler: HttpMethodEndpointHandler<TDef>
 ) {
   endpointContainer.handle(handler);
   const { genericPath } = endpointContainer.methodEndpoint;
-  const method = endpointContainer.methodEndpoint.method.toLowerCase() as LowerCasedMethod;
+  const method = endpointContainer.methodEndpoint.method.toLowerCase() as LowerCasedHttpMethod;
   app[method](genericPath, async (req, res) => {
     const pathParams = req.params;
     const query = req.query;

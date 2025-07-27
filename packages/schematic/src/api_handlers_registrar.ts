@@ -1,20 +1,20 @@
 import { ApiContract, IApiContractDefinition } from "./api_contract.js";
-import { IMethodEndpointDefinition, MethodEndpoint } from "./http_method_endpoint.js";
-import { MethodEndpointHandler } from "./http_method_endpoint_handler.js";
-import { Method } from "./http_method_type.js";
+import { IHttpMethodEndpointDefinition, HttpMethodEndpoint } from "./http_method_endpoint.js";
+import { HttpMethodEndpointHandler } from "./http_method_endpoint_handler.js";
+import { HttpMethod } from "./http_method_type.js";
 
-export class MethodEndpointHandlerContainer<TDef extends IMethodEndpointDefinition> {
-  private _methodEndpoint: MethodEndpoint<TDef>;
-  get methodEndpoint(): MethodEndpoint<TDef> {
+export class MethodEndpointHandlerContainer<TDef extends IHttpMethodEndpointDefinition> {
+  private _methodEndpoint: HttpMethodEndpoint<TDef>;
+  get methodEndpoint(): HttpMethodEndpoint<TDef> {
     return this._methodEndpoint;
   }
 
-  constructor(methodEndpoint: MethodEndpoint<TDef>) {
+  constructor(methodEndpoint: HttpMethodEndpoint<TDef>) {
     this._methodEndpoint = methodEndpoint;
   }
 
-  private _handler: MethodEndpointHandler<TDef> | null = null;
-  handle(handler: MethodEndpointHandler<TDef>): void {
+  private _handler: HttpMethodEndpointHandler<TDef> | null = null;
+  handle(handler: HttpMethodEndpointHandler<TDef>): void {
     this._handler = handler;
   }
 
@@ -92,7 +92,7 @@ class InnerApiHandlersRegistrar<TDef extends IApiContractDefinition> {
   ): void {
     for (const key of Object.keys(currObj)) {
       const value = currObj[key];
-      if (value instanceof MethodEndpoint) {
+      if (value instanceof HttpMethodEndpoint) {
         currObj[key] = new MethodEndpointHandlerContainer(value);
       } else if (typeof value === "object" && value !== null) {
         InnerApiHandlersRegistrar._implement(value);
@@ -104,7 +104,7 @@ class InnerApiHandlersRegistrar<TDef extends IApiContractDefinition> {
 export function routeByPathSegments<TDef extends IApiContractDefinition>(
   registrar: InnerApiHandlersRegistrar<TDef>,
   pathSegments: readonly string[],
-  method: Method
+  method: HttpMethod
 ): MethodEndpointHandlerContainer<any> {
   let current: any = registrar;
   for (const segment of pathSegments) {
@@ -127,7 +127,7 @@ export function routeByPathSegments<TDef extends IApiContractDefinition>(
 }
 
 export type ApiHandlersRegistrarDef<ObjType extends object> = {
-  [Key in keyof ObjType]: ObjType[Key] extends MethodEndpoint<infer TMethodEndpointDef>
+  [Key in keyof ObjType]: ObjType[Key] extends HttpMethodEndpoint<infer TMethodEndpointDef>
     ? MethodEndpointHandlerContainer<TMethodEndpointDef>
     : ObjType[Key] extends object
       ? ApiHandlersRegistrarDef<ObjType[Key]>

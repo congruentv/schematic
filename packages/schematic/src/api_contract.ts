@@ -1,12 +1,12 @@
-import { MethodEndpoint } from "./http_method_endpoint.js";
+import { HttpMethodEndpoint } from "./http_method_endpoint.js";
 
 export interface IApiContractDefinition {
-  [key: string]: IApiContractDefinition | MethodEndpoint<any>;
+  [key: string]: IApiContractDefinition | HttpMethodEndpoint<any>;
 }
 
 function isApiContractDefinition(obj: any): obj is IApiContractDefinition {
   return typeof obj === 'object' && obj !== null && !Array.isArray(obj) && Object.values(obj).every(
-    value => value instanceof MethodEndpoint || isApiContractDefinition(value)
+    value => value instanceof HttpMethodEndpoint || isApiContractDefinition(value)
   );
 }
 
@@ -34,7 +34,7 @@ export class ApiContract<const TDef extends IApiContractDefinition> {
     const result: IApiContractDefinition = {};
     for (const key in definition) {
       const value = definition[key];
-      if (value instanceof MethodEndpoint) {
+      if (value instanceof HttpMethodEndpoint) {
         result[key] = value._cloneWith(path, key);
       } else if (isApiContractDefinition(value)) {
         result[key] = ApiContract._deepClone(value, [...path, key]);

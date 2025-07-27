@@ -1,14 +1,14 @@
 import { z } from 'zod';
-import { StatusCode } from './http_status_code.js';
-import { Method } from './http_method_type.js';
+import { HttpStatusCode } from './http_status_code.js';
+import { HttpMethod } from './http_method_type.js';
 
-export interface IMethodEndpointDefinition {
+export interface IHttpMethodEndpointDefinition {
   query?: z.ZodType;
   body?: z.ZodType;
-  responses: MethodEndpointResponses;
+  responses: HttpMethodEndpointResponses;
 }
 
-export class MethodEndpoint<const TDef extends IMethodEndpointDefinition> {
+export class HttpMethodEndpoint<const TDef extends IHttpMethodEndpointDefinition> {
   private _definition: TDef;
   get definition(): TDef {
     return this._definition;
@@ -27,8 +27,8 @@ export class MethodEndpoint<const TDef extends IMethodEndpointDefinition> {
     return this._cachedGenericPath;
   }
 
-  private _method: Method = null as any;
-  get method(): Method {
+  private _method: HttpMethod = null as any;
+  get method(): HttpMethod {
     return this._method;
   }
 
@@ -37,8 +37,8 @@ export class MethodEndpoint<const TDef extends IMethodEndpointDefinition> {
   }
 
   /** @internal */
-  _cloneWith(path: readonly string[], method: string): MethodEndpoint<TDef> {
-    const result = new MethodEndpoint<TDef>({
+  _cloneWith(path: readonly string[], method: string): HttpMethodEndpoint<TDef> {
+    const result = new HttpMethodEndpoint<TDef>({
       query: !!this._definition.query ? this._definition.query.clone() : undefined,
       body: !!this._definition.body ? this._definition.body.clone() : undefined,
       responses: Object.fromEntries(
@@ -49,12 +49,12 @@ export class MethodEndpoint<const TDef extends IMethodEndpointDefinition> {
       )
     } as TDef);
     result._pathSegments = path;
-    result._method = method as Method;
+    result._method = method as HttpMethod;
     return result;
   }
 }
 
-export class MethodEndpointResponse<_TStatus extends StatusCode, TPayloadSchema extends z.ZodType = z.ZodType> {
+export class HttpMethodEndpointResponse<_TStatus extends HttpStatusCode, TPayloadSchema extends z.ZodType = z.ZodType> {
   private _payloadSchema: TPayloadSchema;
   get payloadSchema(): TPayloadSchema {
     return this._payloadSchema;
@@ -65,11 +65,11 @@ export class MethodEndpointResponse<_TStatus extends StatusCode, TPayloadSchema 
   }
 
   /** @internal */
-  _clone(): MethodEndpointResponse<_TStatus, TPayloadSchema> {
-    return new MethodEndpointResponse<_TStatus, TPayloadSchema>(this._payloadSchema.clone());
+  _clone(): HttpMethodEndpointResponse<_TStatus, TPayloadSchema> {
+    return new HttpMethodEndpointResponse<_TStatus, TPayloadSchema>(this._payloadSchema.clone());
   }
 }
 
-export type MethodEndpointResponses = Partial<{
-  [status in StatusCode]: MethodEndpointResponse<status, any>;
+export type HttpMethodEndpointResponses = Partial<{
+  [status in HttpStatusCode]: HttpMethodEndpointResponse<status, any>;
 }>;

@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { IMethodEndpointDefinition } from "./http_method_endpoint.js";
-import { MethodEndpointHandlerOutput } from "./http_method_endpoint_handler_output.js";
+import { IHttpMethodEndpointDefinition } from "./http_method_endpoint.js";
+import { HttpMethodEndpointHandlerOutput } from "./http_method_endpoint_handler_output.js";
 
-export type MethodCallInput<T extends IMethodEndpointDefinition> =
+export type HttpMethodCallInput<T extends IHttpMethodEndpointDefinition> =
   // 1) you declared a `query:` schema?
   T['query'] extends z.ZodType<any, any>
     ? (
@@ -19,7 +19,7 @@ export type MethodCallInput<T extends IMethodEndpointDefinition> =
       // 2b) neither query nor body: never
       : never;
 
-export type MethodCallFunc<T extends IMethodEndpointDefinition> = 
-  MethodCallInput<T> extends never
-    ? () => Promise<MethodEndpointHandlerOutput<T>>
-    : (input: MethodCallInput<T>) => Promise<MethodEndpointHandlerOutput<T>>;
+export type HttpMethodCallFunc<T extends IHttpMethodEndpointDefinition> = 
+  HttpMethodCallInput<T> extends never
+    ? () => Promise<HttpMethodEndpointHandlerOutput<T>>
+    : (input: HttpMethodCallInput<T>) => Promise<HttpMethodEndpointHandlerOutput<T>>;

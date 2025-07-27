@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "stripInternal": true,
+    
     /* Basic output */
     "rootDir": "src",             
     "outDir": "dist",             
