@@ -2,9 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 
-import { ApiHandlersRegistrar } from '@congruentv/schematic';
+import { ApiHandlersRegistry } from '@congruentv/schematic';
 import { HttpStatusCode } from '@congruentv/schematic';
-import { configureEndpoint } from '@congruentv/schematic-adapter-express';
+import { register } from '@congruentv/schematic-adapter-express';
 
 import { 
   pokemonApiContract, 
@@ -24,28 +24,35 @@ const pokemons: Pokemon[] = [
   { id: 6, name: 'Charizard', description: 'Fire type', type: 'fire' },
 ];
 
+const pokemonApi = new ApiHandlersRegistry(pokemonApiContract);
 
-const pokemonApi = new ApiHandlersRegistrar(pokemonApiContract);
-
-configureEndpoint(app, pokemonApi.pokemon.GET, async ({ query }) => {
+register(app, pokemonApi.pokemon.GET, async ({ query }) => {
   return {
     code: HttpStatusCode.OK_200,
-    payload: {
+    body: {
       list: pokemons.slice(query.skip, query.take + query.skip),
       total: pokemons.length,
     },
   };
 });
 
-configureEndpoint(app, pokemonApi.pokemon[':id'].GET, async ({ pathParams }) => {
+register(app, pokemonApi.pokemon[':id'].GET, async ({ pathParams }) => {
   const pokemon = pokemons.find(p => p.id.toString() === pathParams.id);
   if (!pokemon) {
-    return { code: HttpStatusCode.NotFound_404, payload: { userMessage: `Pokemon with ID ${pathParams.id} not found` } };
+    return { code: HttpStatusCode.NotFound_404, body: { userMessage: `Pokemon with ID ${pathParams.id} not found` } };
   }
-  return { code: HttpStatusCode.OK_200, payload: pokemon };
+  return { code: HttpStatusCode.OK_200, body: pokemon };
 });
 
-configureEndpoint(app, pokemonApi.pokemon.POST, async ({ body }) => {
+register(app, pokemonApi.pokemon[':id'].DELETE, async ({ pathParams }) => {
+  const pokemon = pokemons.find(p => p.id.toString() === pathParams.id);
+  if (!pokemon) {
+    return { code: HttpStatusCode.NotFound_404, body: { userMessage: `Pokemon with ID ${pathParams.id} not found` } };
+  }
+  return { code: HttpStatusCode.NoContent_204 };
+});
+
+register(app, pokemonApi.pokemon.POST, async ({ body }) => {
   const newPokemon = {
     id: pokemons.length + 1,
     ...body,
@@ -53,7 +60,7 @@ configureEndpoint(app, pokemonApi.pokemon.POST, async ({ body }) => {
   pokemons.push(newPokemon);
   return {
     code: HttpStatusCode.Created_201,
-    payload: newPokemon,
+    body: newPokemon.id,
   };
 });
 

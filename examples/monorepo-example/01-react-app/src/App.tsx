@@ -17,7 +17,7 @@ function App() {
     client.pokemon.id(count).GET()
       .then(response => {
         if (response.code === HttpStatusCode.OK_200) {
-          setPokemonName(response.payload.name);
+          setPokemonName(response.body.name);
         } else {
           setPokemonName('Pokemon not found');
         }

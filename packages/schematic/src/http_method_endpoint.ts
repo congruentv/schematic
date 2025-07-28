@@ -1,12 +1,21 @@
 import { z } from 'zod';
 import { HttpStatusCode } from './http_status_code.js';
 import { HttpMethod } from './http_method_type.js';
+import { HttpMethodEndpointResponse } from './http_method_endpoint_response.js';
+
+export function endpoint<TDef extends IHttpMethodEndpointDefinition>(definition: TDef): HttpMethodEndpoint<TDef> {
+  return new HttpMethodEndpoint<TDef>(definition);
+}
 
 export interface IHttpMethodEndpointDefinition {
   query?: z.ZodType;
   body?: z.ZodType;
   responses: HttpMethodEndpointResponses;
 }
+
+export type HttpMethodEndpointResponses = Partial<{
+  [status in HttpStatusCode]: HttpMethodEndpointResponse<status, any>;
+}>;
 
 export class HttpMethodEndpoint<const TDef extends IHttpMethodEndpointDefinition> {
   private _definition: TDef;
@@ -54,22 +63,3 @@ export class HttpMethodEndpoint<const TDef extends IHttpMethodEndpointDefinition
   }
 }
 
-export class HttpMethodEndpointResponse<_TStatus extends HttpStatusCode, TPayloadSchema extends z.ZodType = z.ZodType> {
-  private _payloadSchema: TPayloadSchema;
-  get payloadSchema(): TPayloadSchema {
-    return this._payloadSchema;
-  }
-
-  constructor(payloadSchema: TPayloadSchema) {
-    this._payloadSchema = payloadSchema;
-  }
-
-  /** @internal */
-  _clone(): HttpMethodEndpointResponse<_TStatus, TPayloadSchema> {
-    return new HttpMethodEndpointResponse<_TStatus, TPayloadSchema>(this._payloadSchema.clone());
-  }
-}
-
-export type HttpMethodEndpointResponses = Partial<{
-  [status in HttpStatusCode]: HttpMethodEndpointResponse<status, any>;
-}>;

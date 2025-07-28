@@ -1,19 +1,20 @@
 import { z } from 'zod';
-import { IHttpMethodEndpointDefinition, HttpMethodEndpointResponse } from "./http_method_endpoint.js";
+import { IHttpMethodEndpointDefinition } from "./http_method_endpoint.js";
 import { HttpStatusCode } from './http_status_code.js';
+import { HttpMethodEndpointResponse } from './http_method_endpoint_response.js';
 
 export type HttpMethodEndpointHandlerOutput<TEndpointDefinition extends IHttpMethodEndpointDefinition> = {
-  [K in keyof TEndpointDefinition['responses'] & HttpStatusCode]: {
-    code: K;
-    payload: TEndpointDefinition['responses'][K] extends HttpMethodEndpointResponse<any, infer TPayloadSchema>
-      ? TPayloadSchema extends z.ZodType
-        ? z.infer<TPayloadSchema>
-        : never
-      : never;
+  [THttpStatusCode in keyof TEndpointDefinition['responses'] & HttpStatusCode]: {
+    code: THttpStatusCode;
+    body: TEndpointDefinition['responses'][THttpStatusCode] extends HttpMethodEndpointResponse<THttpStatusCode, infer TRespDef>
+      ? TRespDef['body'] extends z.ZodType
+        ? z.infer<TRespDef['body']>
+        : undefined
+      : undefined;
   };
 }[keyof TEndpointDefinition['responses'] & HttpStatusCode];
 
 export type ClientHttpMethodEndpointHandlerOutput = {
   code: HttpStatusCode;
-  payload: any;
+  body: any;
 }

@@ -1,8 +1,8 @@
 import z from "zod";
 import { 
   ApiContract, 
-  HttpMethodEndpoint,
-  HttpMethodEndpointResponse ,
+  endpoint,
+  response,
   HttpStatusCode
 } from "@congruentv/schematic";
 
@@ -28,51 +28,70 @@ export const NotFoundSchema = z.object({
 });
 
 export const pokemonApiContract = new ApiContract({
+  // TODO
+  // foo: {
+  //   bar: {
+  //     baz: endpoint({ // "baz" is not a valid HTTP method and should Not Be Allowed
+  //       responses: {
+  //         [HttpStatusCode.OK_200]: response({ body: z.string() }),
+  //       },
+  //     }),
+  //   }
+  // },
   pokemon: {
-    GET: new HttpMethodEndpoint({
+    GET: endpoint({
       query: z.object({
         take: z.number().int().min(1).max(100).default(10),
         skip: z.number().int().min(0).default(0),
         type: PokemonSchema.shape.type.optional(),
       }),
       responses: {
-        [HttpStatusCode.OK_200]: new HttpMethodEndpointResponse(z.object({
-          list: z.array(PokemonSchema),
-          total: z.number().int(),
-        })),
+        [HttpStatusCode.OK_200]: response({
+          body: z.object({
+            list: z.array(PokemonSchema),
+            total: z.number().int(),
+          })
+        }),
+        // TODO
+        // ["This Should Not Be Allowed"]: response({ 
+        //   body: z.object({
+        //     list: z.array(PokemonSchema),
+        //     total: z.number().int(),
+        //   })
+        // }),
       }
     }),
-    POST: new HttpMethodEndpoint({
+    POST: endpoint({
       body: CreatePokemonSchema,
       responses: {
-        [HttpStatusCode.Created_201]: new HttpMethodEndpointResponse(PokemonSchema),
+        [HttpStatusCode.Created_201]: response({ body: z.number().int() }),
       }
     }),
     [':id']: {
-      GET: new HttpMethodEndpoint({
+      GET: endpoint({
         responses: {
-          [HttpStatusCode.OK_200]: new HttpMethodEndpointResponse(PokemonSchema),
-          [HttpStatusCode.NotFound_404]: new HttpMethodEndpointResponse(NotFoundSchema),
+          [HttpStatusCode.OK_200]: response({ body: PokemonSchema }),
+          [HttpStatusCode.NotFound_404]: response({ body: NotFoundSchema }),
         },
       }),
-      DELETE: new HttpMethodEndpoint({
+      DELETE: endpoint({
         responses: {
-          [HttpStatusCode.NoContent_204]: new HttpMethodEndpointResponse(z.void()),
-          [HttpStatusCode.NotFound_404]: new HttpMethodEndpointResponse(NotFoundSchema),
+          [HttpStatusCode.NoContent_204]: response({ }),
+          [HttpStatusCode.NotFound_404]: response({ body: NotFoundSchema }),
         }
       }),
-      UPDATE: new HttpMethodEndpoint({
+      UPDATE: endpoint({
         body: PokemonSchema,
         responses: {
-          [HttpStatusCode.OK_200]: new HttpMethodEndpointResponse(PokemonSchema),
-          [HttpStatusCode.NotFound_404]: new HttpMethodEndpointResponse(NotFoundSchema),
+          [HttpStatusCode.OK_200]: response({ body: PokemonSchema }),
+          [HttpStatusCode.NotFound_404]: response({ body: NotFoundSchema }),
         }
       }),
-      PATCH: new HttpMethodEndpoint({
+      PATCH: endpoint({
         body: PokemonSchema.partial(),
         responses: {
-          [HttpStatusCode.OK_200]: new HttpMethodEndpointResponse(PokemonSchema),
-          [HttpStatusCode.NotFound_404]: new HttpMethodEndpointResponse(NotFoundSchema),
+          [HttpStatusCode.OK_200]: response({ body: PokemonSchema }),
+          [HttpStatusCode.NotFound_404]: response({ body: NotFoundSchema }),
         }
       }),
     }

@@ -1,30 +1,30 @@
 import { Express } from 'express';
 import { 
   HttpMethodEndpointHandler,
-  MethodEndpointHandlerContainer, 
+  MethodEndpointHandlerRegistryEntry, 
   IHttpMethodEndpointDefinition,
   type LowerCasedHttpMethod
 } from '@congruentv/schematic';
 
-export function configureEndpoint<const TDef extends IHttpMethodEndpointDefinition>(
+export function register<const TDef extends IHttpMethodEndpointDefinition>(
   app: Express, 
-  endpointContainer: MethodEndpointHandlerContainer<TDef>,
+  endpointEntry: MethodEndpointHandlerRegistryEntry<TDef>,
   handler: HttpMethodEndpointHandler<TDef>
 ) {
-  endpointContainer.handle(handler);
-  const { genericPath } = endpointContainer.methodEndpoint;
-  const method = endpointContainer.methodEndpoint.method.toLowerCase() as LowerCasedHttpMethod;
+  endpointEntry.handle(handler);
+  const { genericPath } = endpointEntry.methodEndpoint;
+  const method = endpointEntry.methodEndpoint.method.toLowerCase() as LowerCasedHttpMethod;
   app[method](genericPath, async (req, res) => {
     const pathParams = req.params;
     const query = req.query;
     const body = req.body;
     const headers = JSON.parse(JSON.stringify(req.headers)); // Convert headers to a plain object
-    const result = await endpointContainer.trigger({
+    const result = await endpointEntry.trigger({
       headers,
       pathParams,
       query,
       body,
     });
-    res.status(result.code).json(result.payload);
+    res.status(result.code).json(result.body);
   });
 }

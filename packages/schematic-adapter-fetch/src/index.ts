@@ -27,12 +27,11 @@ export function createClient<TDef extends IApiContractDefinition>(contract: ApiC
       body,
     });
     const code = response.status as HttpStatusCode;
-    const payload = await response.json();
+    const bodyPayload = await response.json();
     return {
       code,
-      payload,
-    // eslint-disable-next-line
-    } as any;
+      body: bodyPayload,
+    };
   });
   return apiClient;
 }

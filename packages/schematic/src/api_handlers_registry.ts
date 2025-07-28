@@ -3,7 +3,7 @@ import { IHttpMethodEndpointDefinition, HttpMethodEndpoint } from "./http_method
 import { HttpMethodEndpointHandler } from "./http_method_endpoint_handler.js";
 import { HttpMethod } from "./http_method_type.js";
 
-export class MethodEndpointHandlerContainer<TDef extends IHttpMethodEndpointDefinition> {
+export class MethodEndpointHandlerRegistryEntry<TDef extends IHttpMethodEndpointDefinition> {
   private _methodEndpoint: HttpMethodEndpoint<TDef>;
   get methodEndpoint(): HttpMethodEndpoint<TDef> {
     return this._methodEndpoint;
@@ -75,16 +75,16 @@ export class MethodEndpointHandlerContainer<TDef extends IHttpMethodEndpointDefi
   }
 }
 
-class InnerApiHandlersRegistrar<TDef extends IApiContractDefinition> {
+class InnerApiHandlersRegistry<TDef extends IApiContractDefinition> {
   constructor(contract: ApiContract<TDef>) {
     const clonedDefinition = contract._cloneDefinition();
 
-    const proto = { ...InnerApiHandlersRegistrar.prototype };
+    const proto = { ...InnerApiHandlersRegistry.prototype };
     Object.assign(proto, Object.getPrototypeOf(clonedDefinition));
     Object.setPrototypeOf(this, proto);
     Object.assign(this, clonedDefinition);
 
-    InnerApiHandlersRegistrar._implement(this);
+    InnerApiHandlersRegistry._implement(this);
   }
 
   private static _implement(
@@ -93,22 +93,22 @@ class InnerApiHandlersRegistrar<TDef extends IApiContractDefinition> {
     for (const key of Object.keys(currObj)) {
       const value = currObj[key];
       if (value instanceof HttpMethodEndpoint) {
-        currObj[key] = new MethodEndpointHandlerContainer(value);
+        currObj[key] = new MethodEndpointHandlerRegistryEntry(value);
       } else if (typeof value === "object" && value !== null) {
-        InnerApiHandlersRegistrar._implement(value);
+        InnerApiHandlersRegistry._implement(value);
       }
     }
   }
 }
 
 export function routeByPathSegments<TDef extends IApiContractDefinition>(
-  registrar: InnerApiHandlersRegistrar<TDef>,
+  registrar: InnerApiHandlersRegistry<TDef>,
   pathSegments: readonly string[],
   method: HttpMethod
-): MethodEndpointHandlerContainer<any> {
+): MethodEndpointHandlerRegistryEntry<any> {
   let current: any = registrar;
   for (const segment of pathSegments) {
-    if (current[segment] instanceof MethodEndpointHandlerContainer) {
+    if (current[segment] instanceof MethodEndpointHandlerRegistryEntry) {
       current = current[segment];
     } else if (typeof current[segment] === 'object') {
       current = current[segment];
@@ -119,20 +119,20 @@ export function routeByPathSegments<TDef extends IApiContractDefinition>(
   if (!(method in current)) {
     throw new Error(`Method "${method}" not found for path "${pathSegments.join('/')}"`);
   }
-  if (!(current[method] instanceof MethodEndpointHandlerContainer)) {
+  if (!(current[method] instanceof MethodEndpointHandlerRegistryEntry)) {
     throw new Error(`Method "${method}" is not a valid endpoint handler for path "${pathSegments.join('/')}"`);
   }
   current = current[method];
   return current;
 }
 
-export type ApiHandlersRegistrarDef<ObjType extends object> = {
+export type ApiHandlersRegistryDef<ObjType extends object> = {
   [Key in keyof ObjType]: ObjType[Key] extends HttpMethodEndpoint<infer TMethodEndpointDef>
-    ? MethodEndpointHandlerContainer<TMethodEndpointDef>
+    ? MethodEndpointHandlerRegistryEntry<TMethodEndpointDef>
     : ObjType[Key] extends object
-      ? ApiHandlersRegistrarDef<ObjType[Key]>
+      ? ApiHandlersRegistryDef<ObjType[Key]>
       : ObjType[Key];
 }
 
-export type ApiHandlersRegistrar<TDef extends IApiContractDefinition> = ApiHandlersRegistrarDef<InnerApiHandlersRegistrar<TDef> & TDef>;
-export const ApiHandlersRegistrar: new <TDef extends IApiContractDefinition>(contract: ApiContract<TDef>) => ApiHandlersRegistrar<TDef> = InnerApiHandlersRegistrar as any;
+export type ApiHandlersRegistry<TDef extends IApiContractDefinition> = ApiHandlersRegistryDef<InnerApiHandlersRegistry<TDef> & TDef>;
+export const ApiHandlersRegistry: new <TDef extends IApiContractDefinition>(contract: ApiContract<TDef>) => ApiHandlersRegistry<TDef> = InnerApiHandlersRegistry as any;
