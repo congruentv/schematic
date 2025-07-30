@@ -62,6 +62,9 @@ export const pokemonApiContract = new ApiContract({
       }
     }),
     POST: endpoint({
+      headers: z.object({
+        'x-custom-header': z.string(),
+      }),
       body: CreatePokemonSchema,
       responses: {
         [HttpStatusCode.Created_201]: response({ body: z.number().int() }),
@@ -90,7 +93,7 @@ export const pokemonApiContract = new ApiContract({
       PATCH: endpoint({
         body: PokemonSchema.partial(),
         responses: {
-          [HttpStatusCode.OK_200]: response({ body: PokemonSchema }),
+          [HttpStatusCode.NoContent_204]: response({ }),
           [HttpStatusCode.NotFound_404]: response({ body: NotFoundSchema }),
         }
       }),

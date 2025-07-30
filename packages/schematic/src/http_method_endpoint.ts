@@ -8,6 +8,7 @@ export function endpoint<TDef extends IHttpMethodEndpointDefinition>(definition:
 }
 
 export interface IHttpMethodEndpointDefinition {
+  headers?: z.ZodType;
   query?: z.ZodType;
   body?: z.ZodType;
   responses: HttpMethodEndpointResponses;

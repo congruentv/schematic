@@ -1,0 +1,19 @@
+{
+  "name": "@monorepo-example/node-client",
+  "type": "module",
+  "version": "0.0.4",
+  "packageManager": "pnpm@10.8.1",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "pnpm exec tsx --env-file .env.dev src/index.ts"
+  },
+  "dependencies": {
+    "@congruentv/schematic": "workspace:*",
+    "@congruentv/schematic-adapter-fetch": "workspace:*",
+    "@monorepo-example/contract": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  }
+}

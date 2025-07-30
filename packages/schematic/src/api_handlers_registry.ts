@@ -2,6 +2,7 @@ import { ApiContract, IApiContractDefinition } from "./api_contract.js";
 import { IHttpMethodEndpointDefinition, HttpMethodEndpoint } from "./http_method_endpoint.js";
 import { HttpMethodEndpointHandler } from "./http_method_endpoint_handler.js";
 import { HttpMethod } from "./http_method_type.js";
+import { HttpStatusCode } from "./http_status_code.js";
 
 export class MethodEndpointHandlerRegistryEntry<TDef extends IHttpMethodEndpointDefinition> {
   private _methodEndpoint: HttpMethodEndpoint<TDef>;
@@ -28,6 +29,20 @@ export class MethodEndpointHandlerRegistryEntry<TDef extends IHttpMethodEndpoint
       throw new Error('Handler not set for this endpoint');
     }
 
+    if (this._methodEndpoint.definition.headers) {
+      if (
+        !('headers' in data)
+        || data.headers === null
+        || data.headers === undefined
+      ) {
+        throw new Error('Headers are required for this endpoint');
+      }
+      const result = this._methodEndpoint.definition.headers.safeParse(data.headers);
+      if (!result.success) {
+        return { code: HttpStatusCode.BadRequest_400, body: JSON.parse(result.error.message) };
+      }
+    }
+
     if (this._methodEndpoint.definition.query) {
       if (
         !('query' in data)
@@ -38,7 +53,7 @@ export class MethodEndpointHandlerRegistryEntry<TDef extends IHttpMethodEndpoint
       }
       const result = this._methodEndpoint.definition.query.safeParse(data.query);
       if (!result.success) {
-        throw result.error;
+        return { code: HttpStatusCode.BadRequest_400, body: JSON.parse(result.error.message) };
       }
     }
 
@@ -52,7 +67,7 @@ export class MethodEndpointHandlerRegistryEntry<TDef extends IHttpMethodEndpoint
       }
       const result = this._methodEndpoint.definition.body.safeParse(data.body);
       if (!result.success) {
-        throw result.error;
+        return { code: HttpStatusCode.BadRequest_400, body: JSON.parse(result.error.message) };
       }
     }
 

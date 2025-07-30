@@ -8,6 +8,10 @@ import { pokemonApiContract } from '@monorepo-example/contract';
 
 const client = createClient(pokemonApiContract, {
   baseUrl: 'http://localhost:3000',
+  headers: () => ({
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + (localStorage.getItem('token') ?? 'dummy-token'),
+  }),
 });
 
 function App() {
