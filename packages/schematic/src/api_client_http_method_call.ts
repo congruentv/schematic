@@ -2,32 +2,12 @@ import { z } from "zod";
 import { IHttpMethodEndpointDefinition } from "./http_method_endpoint.js";
 import { HttpMethodEndpointHandlerOutput } from "./http_method_endpoint_handler_output.js";
 
-//// <old implementation, kept for reference>
-// export type HttpMethodCallInput<T extends IHttpMethodEndpointDefinition> =
-//   // 1) you declared a `query:` schema?
-//   T['query'] extends z.ZodType<any, any>
-//     ? (
-//         // 1a) …and also a `body:` schema?
-//         T['body'] extends z.ZodType<any, any>
-//           ? { query: z.infer<T['query']>; body: z.infer<T['body']> }
-//           // 1b) …no body schema
-//           : { query: z.infer<T['query']> }
-//       )
-//     // 2) you didn’t declare a query…
-//     : T['body'] extends z.ZodType<any, any>
-//       // 2a) …but you did declare a body schema
-//       ? { body: z.infer<T['body']> }
-//       // 2b) neither query nor body: never
-//       : never;
-//// </old implementation, kept for reference>
-
-
-// 1) Helper: “If T[P] is a Zod schema, produce { [P]: z.infer<…> }, else {}”
-type InferProp<
+// 1) Helper: “If T[P] is a Zod schema, produce { [P]: z.input<…> }, else {}”
+type InferInputProp<
   T extends IHttpMethodEndpointDefinition,
   P extends keyof T
 > = T[P] extends z.ZodType<any, any>
-  ? Record<P, z.infer<T[P]>>
+  ? Record<P, z.input<T[P]>>
   : {};
 
 // 2) Merge three of them:
@@ -37,14 +17,14 @@ type Merge3<A, B, C> = A & B & C;
 export type HttpMethodCallInput<
   T extends IHttpMethodEndpointDefinition
 > = Merge3<
-    InferProp<T, "query">,
-    InferProp<T, "body">,
-    InferProp<T, "headers">
-  > extends infer M                       // infer the merged object
+    InferInputProp<T, "headers">,
+    InferInputProp<T, "query">,
+    InferInputProp<T, "body">
+  > extends infer M                      // infer the merged object
     ? keyof M extends never              // if it has no keys…
       ? never                            // → you declared nothing
       : M                                // otherwise → that’s your input
-    : never;
+    : never;                             // this is just a type guard to ensure M is inferred correctly
 
 export type HttpMethodCallFunc<T extends IHttpMethodEndpointDefinition> = 
   HttpMethodCallInput<T> extends never

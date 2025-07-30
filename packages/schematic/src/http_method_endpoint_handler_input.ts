@@ -9,8 +9,8 @@ export type HttpMethodEndpointHandlerInput<TEndpointDefinition extends IHttpMeth
   genericPath: string;
   headers: Record<string, string>;
   pathParams: Record<string, string>;
-  query: TEndpointDefinition['query'] extends z.ZodType ? z.infer<TEndpointDefinition['query']> : null;
-  body: TEndpointDefinition['body'] extends z.ZodType ? z.infer<TEndpointDefinition['body']> : null;
+  query: TEndpointDefinition['query'] extends z.ZodType ? z.output<TEndpointDefinition['query']> : null; // z.output because the handler receives the parsed input
+  body: TEndpointDefinition['body'] extends z.ZodType ? z.output<TEndpointDefinition['body']> : null; // z.output because the handler receives the parsed input
 };
 
 export type ClientHttpMethodEndpointHandlerInput = {

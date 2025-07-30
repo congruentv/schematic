@@ -14,7 +14,7 @@ const client = createClient(pokemonApiContract, {
 console.log('Fetching all Pokemons...');
 const listResponse = await client.pokemon.GET({
   query: {
-    take: 10,
+    take: '10',
     skip: 0,
   }
 });

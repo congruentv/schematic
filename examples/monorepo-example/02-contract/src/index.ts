@@ -17,11 +17,11 @@ export const PokemonSchema = z.object({
   description: z.string().optional(),
 });
 
-export type Pokemon = z.infer<typeof PokemonSchema>;
+export type Pokemon = z.output<typeof PokemonSchema>;
 
 export const CreatePokemonSchema = PokemonSchema.omit({ id: true });
 
-export type CreatePokemon = z.infer<typeof CreatePokemonSchema>;
+export type CreatePokemon = z.output<typeof CreatePokemonSchema>;
 
 export const NotFoundSchema = z.object({
   userMessage: z.string(),
@@ -41,8 +41,14 @@ export const pokemonApiContract = new ApiContract({
   pokemon: {
     GET: endpoint({
       query: z.object({
-        take: z.number().int().min(1).max(100).default(10),
-        skip: z.number().int().min(0).default(0),
+        take: z.union([z.number(), z.string()]) // z.input
+                .transform((v) => (typeof v === "string" ? Number(v) : v))
+                .pipe(z.number().min(0).max(25)) // z.output
+                .default(10),
+        skip: z.union([z.number(), z.string()])
+                .transform((v) => (typeof v === "string" ? Number(v) : v))
+                .pipe(z.number().min(0))
+                .default(10),
         type: PokemonSchema.shape.type.optional(),
       }),
       responses: {
