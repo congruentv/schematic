@@ -36,7 +36,8 @@ register(app, pokemonApi.pokemon.GET, async ({ query }) => {
   };
 });
 
-register(app, pokemonApi.pokemon[':id'].GET, async ({ pathParams }) => {
+register(app, pokemonApi.pokemon[':id'].GET, async ({ pathParams, headers }) => {
+  console.log('Headers:', headers);
   const pokemon = pokemons.find(p => p.id.toString() === pathParams.id);
   if (!pokemon) {
     return { code: HttpStatusCode.NotFound_404, body: { userMessage: `Pokemon with ID ${pathParams.id} not found` } };
@@ -49,10 +50,21 @@ register(app, pokemonApi.pokemon[':id'].DELETE, async ({ pathParams }) => {
   if (!pokemon) {
     return { code: HttpStatusCode.NotFound_404, body: { userMessage: `Pokemon with ID ${pathParams.id} not found` } };
   }
+  pokemons.splice(pokemons.indexOf(pokemon), 1);
   return { code: HttpStatusCode.NoContent_204 };
 });
 
-register(app, pokemonApi.pokemon.POST, async ({ body }) => {
+register(app, pokemonApi.pokemon[':id'].PATCH, async ({ pathParams, body }) => {
+  const pokemon = pokemons.find(p => p.id.toString() === pathParams.id);
+  if (!pokemon) {
+    return { code: HttpStatusCode.NotFound_404, body: { userMessage: `Pokemon with ID ${pathParams.id} not found` } };
+  }
+  Object.assign(pokemon, body);
+  return { code: HttpStatusCode.NoContent_204 };
+});
+
+register(app, pokemonApi.pokemon.POST, async ({ headers, body }) => {
+  console.log('Headers:', headers);
   const newPokemon = {
     id: pokemons.length + 1,
     ...body,

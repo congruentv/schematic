@@ -8,7 +8,7 @@ export type HttpMethodEndpointHandlerOutput<TEndpointDefinition extends IHttpMet
     code: THttpStatusCode;
     body: TEndpointDefinition['responses'][THttpStatusCode] extends HttpMethodEndpointResponse<THttpStatusCode, infer TRespDef>
       ? TRespDef['body'] extends z.ZodType
-        ? z.infer<TRespDef['body']>
+        ? z.input<TRespDef['body']> // z.input was used just in case validation of the response body is needed
         : undefined
       : undefined;
   };

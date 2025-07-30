@@ -57,14 +57,25 @@ class InnerApiClient<TDef extends IApiContractDefinition> {
         delete currObj[key];
         InnerApiClient._implement(client, val, clientGenericHandler);
       } else if (val instanceof HttpMethodEndpoint) {
-        currObj[key] = (req: never | { 
-          query: Record<string, any>; 
-          body: any 
-        }) => {
+        currObj[key] = (req: never | { headers: Record<string, string>; query: Record<string, any>; body: any }) => {
           const pathParams = { ...client.__CONTEXT__.pathParameters };
           
           // Clear & reinitialize client context right before making the call
           client.__CONTEXT__ = InnerApiClient._initNewContext(); 
+
+          if (val.definition.headers) {
+            if (
+              !('headers' in req)
+              || req.headers === null
+              || req.headers === undefined
+            ) {
+              throw new Error('Headers are required for this endpoint');
+            }
+            const result = val.definition.headers.safeParse(req.headers);
+            if (!result.success) {
+              throw result.error;
+            }
+          }
 
           if (val.definition.query) {
             if (
@@ -104,7 +115,7 @@ class InnerApiClient<TDef extends IApiContractDefinition> {
             pathSegments: val.pathSegments,
             genericPath: val.genericPath,
             path,
-            headers: {}, // TODO: implement headers passing
+            headers: req?.headers ?? null,
             pathParams,
             query: req?.query ?? null,
             body: req?.body ?? null,
