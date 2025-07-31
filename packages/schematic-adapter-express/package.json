@@ -35,7 +35,8 @@
     "@types/cors": "catalog:",
     "@types/express": "catalog:",
     "express": "catalog:",
-    "pkgroll": "catalog:"
+    "pkgroll": "catalog:",
+    "typescript": "catalog:"
   },
   "scripts": {
     "build": "pkgroll --clean-dist"

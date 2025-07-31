@@ -29,7 +29,8 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "pkgroll": "catalog:"
+    "pkgroll": "catalog:",
+    "typescript": "catalog:"
   },
   "scripts": {
     "build": "pkgroll --clean-dist"

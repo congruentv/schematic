@@ -2,14 +2,16 @@ import {
   ApiClient, 
   HttpStatusCode, 
   type IApiContractDefinition, 
-  ApiContract} from '@congruentv/schematic';
+  ApiContract,
+  ValidateApiContractDefinition
+} from '@congruentv/schematic';
 
 export interface IClientOptions {
   baseUrl: string | (() => string);
   headers?: Record<string, string> | (() => Record<string, string>);
 }
 
-export function createClient<TDef extends IApiContractDefinition>(contract: ApiContract<TDef>, options: IClientOptions) {
+export function createClient<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>>(contract: ApiContract<TDef>, options: IClientOptions) {
   const apiClient = new ApiClient(contract, async ({ headers, method, path, pathParams, query, body }) => {
     const urlParams = new URLSearchParams();
     for (const [key, value] of Object.entries(query ?? {})) {

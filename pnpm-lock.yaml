@@ -31,7 +31,7 @@ catalogs:
       specifier: ^4.20.3
       version: 4.20.3
     typescript:
-      specifier: ^5.8.3
+      specifier: 5.8.3
       version: 5.8.3
     zod:
       specifier: ^4.0.10
@@ -171,6 +171,9 @@ importers:
       pkgroll:
         specifier: 'catalog:'
         version: 2.14.5(typescript@5.8.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.8.3
 
   packages/schematic-adapter-express:
     dependencies:
@@ -193,6 +196,9 @@ importers:
       pkgroll:
         specifier: 'catalog:'
         version: 2.14.5(typescript@5.8.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.8.3
 
   packages/schematic-adapter-fetch:
     dependencies:
@@ -203,6 +209,9 @@ importers:
       pkgroll:
         specifier: 'catalog:'
         version: 2.14.5(typescript@5.8.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.8.3
 
 packages:
 
