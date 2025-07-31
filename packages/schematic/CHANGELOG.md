@@ -1,5 +1,11 @@
 # @congruentv/schematic
 
+## 0.4.0
+
+### Minor Changes
+
+- Key validation of api contract definition and endpoint responses
+
 ## 0.3.0
 
 ### Minor Changes
