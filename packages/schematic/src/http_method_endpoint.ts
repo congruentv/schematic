@@ -3,7 +3,7 @@ import { HttpStatusCode } from './http_status_code.js';
 import { HttpMethod } from './http_method_type.js';
 import { HttpMethodEndpointResponse } from './http_method_endpoint_response.js';
 
-export function endpoint<TDef extends IHttpMethodEndpointDefinition>(definition: TDef): HttpMethodEndpoint<TDef> {
+export function endpoint<TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>>(definition: TDef): HttpMethodEndpoint<TDef> {
   return new HttpMethodEndpoint<TDef>(definition);
 }
 
@@ -14,11 +14,21 @@ export interface IHttpMethodEndpointDefinition {
   responses: HttpMethodEndpointResponses;
 }
 
+export type ValidateHttpMethodEndpointDefinition<TDef extends IHttpMethodEndpointDefinition> = {
+  responses: {
+    [K in keyof TDef['responses']]: K extends HttpStatusCode
+      ? TDef['responses'][K] extends HttpMethodEndpointResponse<infer TStatus, infer TResponseDef>
+        ? HttpMethodEndpointResponse<TStatus, TResponseDef> // OK: response under status code key
+        : "❌ ERROR: HttpMethodEndpointResponse only allowed on HttpStatusCode key"
+      : "❌ ERROR: HttpMethodEndpointResponse only allowed on HttpStatusCode key"
+  }
+}
+
 export type HttpMethodEndpointResponses = Partial<{
   [status in HttpStatusCode]: HttpMethodEndpointResponse<status, any>;
 }>;
 
-export class HttpMethodEndpoint<const TDef extends IHttpMethodEndpointDefinition> {
+export class HttpMethodEndpoint<const TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>> {
   private _definition: TDef;
   get definition(): TDef {
     return this._definition;

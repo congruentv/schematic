@@ -1,6 +1,6 @@
 import z from "zod";
 import { 
-  ApiContract, 
+  apiContract, 
   endpoint,
   response,
   HttpStatusCode
@@ -27,17 +27,7 @@ export const NotFoundSchema = z.object({
   userMessage: z.string(),
 });
 
-export const pokemonApiContract = new ApiContract({
-  // TODO
-  // foo: {
-  //   bar: {
-  //     baz: endpoint({ // "baz" is not a valid HTTP method and should Not Be Allowed
-  //       responses: {
-  //         [HttpStatusCode.OK_200]: response({ body: z.string() }),
-  //       },
-  //     }),
-  //   }
-  // },
+export const pokemonApiContract = apiContract({
   pokemon: {
     GET: endpoint({
       query: z.object({
@@ -58,13 +48,6 @@ export const pokemonApiContract = new ApiContract({
             total: z.number().int(),
           })
         }),
-        // TODO
-        // ["This Should Not Be Allowed"]: response({ 
-        //   body: z.object({
-        //     list: z.array(PokemonSchema),
-        //     total: z.number().int(),
-        //   })
-        // }),
       }
     }),
     POST: endpoint({
@@ -89,7 +72,7 @@ export const pokemonApiContract = new ApiContract({
           [HttpStatusCode.NotFound_404]: response({ body: NotFoundSchema }),
         }
       }),
-      UPDATE: endpoint({
+      PUT: endpoint({
         body: PokemonSchema,
         responses: {
           [HttpStatusCode.OK_200]: response({ body: PokemonSchema }),
@@ -104,5 +87,28 @@ export const pokemonApiContract = new ApiContract({
         }
       }),
     }
-  }
+  },
+  // foo: {
+  //   bar: {
+  //     baz: endpoint({ // "baz" is not a valid HTTP method and will error
+  //       responses: {
+  //         [HttpStatusCode.OK_200]: response({ body: z.string() }),
+  //       },
+  //     }),
+  //     GET: {}, // "GET" is not allowed because it's value is not an endpoint
+  //     POST: endpoint({
+  //       body: z.object({
+  //         name: z.string(),
+  //       }),
+  //       responses: {
+  //         ["InexistantHttpResponseCode"]: response({
+  //           body: z.object({
+  //             list: z.array(PokemonSchema),
+  //             total: z.number().int(),
+  //           })
+  //         }),
+  //       },
+  //     }),
+  //   }
+  // },
 });

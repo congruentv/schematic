@@ -3,10 +3,11 @@ import {
   HttpMethodEndpointHandler,
   MethodEndpointHandlerRegistryEntry, 
   IHttpMethodEndpointDefinition,
-  type LowerCasedHttpMethod
+  type LowerCasedHttpMethod,
+  ValidateHttpMethodEndpointDefinition
 } from '@congruentv/schematic';
 
-export function register<const TDef extends IHttpMethodEndpointDefinition>(
+export function register<const TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>>(
   app: Express, 
   endpointEntry: MethodEndpointHandlerRegistryEntry<TDef>,
   handler: HttpMethodEndpointHandler<TDef>

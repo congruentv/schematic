@@ -1,4 +1,4 @@
-import { ApiContract, IApiContractDefinition } from "./api_contract.js";
+import { ApiContract, IApiContractDefinition, ValidateApiContractDefinition } from "./api_contract.js";
 import { HttpMethodCallFunc,  } from './api_client_http_method_call.js';
 import { HttpMethodEndpoint } from './http_method_endpoint.js';
 import { ClientHttpMethodEndpointHandler } from "./http_method_endpoint_handler.js";
@@ -9,7 +9,7 @@ export interface IClientContext {
   pathParameters: Record<string, string>;
 }
 
-class InnerApiClient<TDef extends IApiContractDefinition> {
+class InnerApiClient<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>> {
 
   // TODO: if making __CONTEXT__ private member, the following compilation error occurs: 
   // "Property '__CONTEXT__' of exported anonymous class type may not be private or protected.ts(4094)"
@@ -38,7 +38,7 @@ class InnerApiClient<TDef extends IApiContractDefinition> {
     };
   }
 
-  private static _implement<TDef extends IApiContractDefinition>(
+  private static _implement<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>>(
     client: InnerApiClient<TDef>,
     currObj: any, 
     clientGenericHandler: ClientHttpMethodEndpointHandler
@@ -147,5 +147,5 @@ export type ApiClientDef<ObjType extends object> = {
           : ObjType[Key];
 };
 
-export type ApiClient<TDef extends IApiContractDefinition> = ApiClientDef<InnerApiClient<TDef> & TDef>;
-export const ApiClient: new <TDef extends IApiContractDefinition>(contract: ApiContract<TDef>, clientGenericHandler: ClientHttpMethodEndpointHandler) => ApiClient<TDef> = InnerApiClient as any;
+export type ApiClient<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>> = ApiClientDef<InnerApiClient<TDef> & TDef>;
+export const ApiClient: new <TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>>(contract: ApiContract<TDef>, clientGenericHandler: ClientHttpMethodEndpointHandler) => ApiClient<TDef> = InnerApiClient as any;

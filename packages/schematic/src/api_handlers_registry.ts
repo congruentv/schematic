@@ -1,10 +1,10 @@
-import { ApiContract, IApiContractDefinition } from "./api_contract.js";
-import { IHttpMethodEndpointDefinition, HttpMethodEndpoint } from "./http_method_endpoint.js";
+import { ApiContract, IApiContractDefinition, ValidateApiContractDefinition } from "./api_contract.js";
+import { IHttpMethodEndpointDefinition, HttpMethodEndpoint, ValidateHttpMethodEndpointDefinition } from "./http_method_endpoint.js";
 import { HttpMethodEndpointHandler } from "./http_method_endpoint_handler.js";
 import { HttpMethod } from "./http_method_type.js";
 import { HttpStatusCode } from "./http_status_code.js";
 
-export class MethodEndpointHandlerRegistryEntry<TDef extends IHttpMethodEndpointDefinition> {
+export class MethodEndpointHandlerRegistryEntry<TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>> {
   private _methodEndpoint: HttpMethodEndpoint<TDef>;
   get methodEndpoint(): HttpMethodEndpoint<TDef> {
     return this._methodEndpoint;
@@ -90,7 +90,7 @@ export class MethodEndpointHandlerRegistryEntry<TDef extends IHttpMethodEndpoint
   }
 }
 
-class InnerApiHandlersRegistry<TDef extends IApiContractDefinition> {
+class InnerApiHandlersRegistry<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>> {
   constructor(contract: ApiContract<TDef>) {
     const clonedDefinition = contract._cloneDefinition();
 
@@ -116,7 +116,7 @@ class InnerApiHandlersRegistry<TDef extends IApiContractDefinition> {
   }
 }
 
-export function routeByPathSegments<TDef extends IApiContractDefinition>(
+export function routeByPathSegments<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>>(
   registrar: InnerApiHandlersRegistry<TDef>,
   pathSegments: readonly string[],
   method: HttpMethod
@@ -149,5 +149,5 @@ export type ApiHandlersRegistryDef<ObjType extends object> = {
       : ObjType[Key];
 }
 
-export type ApiHandlersRegistry<TDef extends IApiContractDefinition> = ApiHandlersRegistryDef<InnerApiHandlersRegistry<TDef> & TDef>;
-export const ApiHandlersRegistry: new <TDef extends IApiContractDefinition>(contract: ApiContract<TDef>) => ApiHandlersRegistry<TDef> = InnerApiHandlersRegistry as any;
+export type ApiHandlersRegistry<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>> = ApiHandlersRegistryDef<InnerApiHandlersRegistry<TDef> & TDef>;
+export const ApiHandlersRegistry: new <TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>>(contract: ApiContract<TDef>) => ApiHandlersRegistry<TDef> = InnerApiHandlersRegistry as any;

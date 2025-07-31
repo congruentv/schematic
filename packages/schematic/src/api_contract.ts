@@ -1,4 +1,9 @@
 import { HttpMethodEndpoint } from "./http_method_endpoint.js";
+import { HttpMethod } from "./http_method_type.js";
+
+export function apiContract<const TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>>(definition: TDef): ApiContract<TDef> {
+  return new ApiContract<TDef>(definition);
+}
 
 export interface IApiContractDefinition {
   [key: string]: IApiContractDefinition | HttpMethodEndpoint<any>;
@@ -10,7 +15,19 @@ function isApiContractDefinition(obj: any): obj is IApiContractDefinition {
   );
 }
 
-export class ApiContract<const TDef extends IApiContractDefinition> {
+export type ValidateApiContractDefinition<T> = {
+  [K in keyof T]: T[K] extends HttpMethodEndpoint<infer TEndpDef>
+    ? K extends HttpMethod
+      ? HttpMethodEndpoint<TEndpDef> // OK: endpoint under method key
+      : "❌ ERROR: HttpMethodEndpoint only allowed on HttpMethod key"
+    : K extends HttpMethod
+      ? " ❌ ERROR: method key must hold an HttpMethodEndpoint"
+      : T[K] extends object
+        ? ValidateApiContractDefinition<T[K]> // recurse for non-method key
+        : T[K];
+};
+
+export class ApiContract<const TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>> {
   
   /** @internal */
   __DEF__: TDef;
