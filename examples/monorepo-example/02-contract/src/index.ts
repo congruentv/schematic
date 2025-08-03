@@ -3,7 +3,7 @@ import {
   apiContract, 
   endpoint,
   response,
-  HttpStatusCode
+  HttpStatusCode as s
 } from "@congruentv/schematic";
 
 export const PokemonSchema = z.object({
@@ -32,17 +32,17 @@ export const pokemonApiContract = apiContract({
     GET: endpoint({
       query: z.object({
         take: z.union([z.number(), z.string()]) // z.input
-                .transform((v) => (typeof v === "string" ? Number(v) : v))
-                .pipe(z.number().min(0).max(25)) // z.output
+                .transform((v) => Number(v))
+                .pipe(z.number().int().min(0).max(25)) // z.output
                 .default(10),
         skip: z.union([z.number(), z.string()])
-                .transform((v) => (typeof v === "string" ? Number(v) : v))
-                .pipe(z.number().min(0))
+                .transform((v) => Number(v))
+                .pipe(z.number().int().min(0))
                 .default(10),
         type: PokemonSchema.shape.type.optional(),
       }),
       responses: {
-        [HttpStatusCode.OK_200]: response({
+        [s.OK_200]: response({
           body: z.object({
             list: z.array(PokemonSchema),
             total: z.number().int(),
@@ -56,34 +56,34 @@ export const pokemonApiContract = apiContract({
       }),
       body: CreatePokemonSchema,
       responses: {
-        [HttpStatusCode.Created_201]: response({ body: z.number().int() }),
+        [s.Created_201]: response({ body: z.number().int() }),
       }
     }),
     [':id']: {
       GET: endpoint({
         responses: {
-          [HttpStatusCode.OK_200]: response({ body: PokemonSchema }),
-          [HttpStatusCode.NotFound_404]: response({ body: NotFoundSchema }),
+          [s.OK_200]: response({ body: PokemonSchema }),
+          [s.NotFound_404]: response({ body: NotFoundSchema }),
         },
       }),
       DELETE: endpoint({
         responses: {
-          [HttpStatusCode.NoContent_204]: response({ }),
-          [HttpStatusCode.NotFound_404]: response({ body: NotFoundSchema }),
+          [s.NoContent_204]: response({ }),
+          [s.NotFound_404]: response({ body: NotFoundSchema }),
         }
       }),
       PUT: endpoint({
         body: PokemonSchema,
         responses: {
-          [HttpStatusCode.OK_200]: response({ body: PokemonSchema }),
-          [HttpStatusCode.NotFound_404]: response({ body: NotFoundSchema }),
+          [s.OK_200]: response({ body: PokemonSchema }),
+          [s.NotFound_404]: response({ body: NotFoundSchema }),
         }
       }),
       PATCH: endpoint({
         body: PokemonSchema.partial(),
         responses: {
-          [HttpStatusCode.NoContent_204]: response({ }),
-          [HttpStatusCode.NotFound_404]: response({ body: NotFoundSchema }),
+          [s.NoContent_204]: response({ }),
+          [s.NotFound_404]: response({ body: NotFoundSchema }),
         }
       }),
     }
@@ -92,7 +92,7 @@ export const pokemonApiContract = apiContract({
   //   bar: {
   //     baz: endpoint({ // "baz" is not a valid HTTP method and will error
   //       responses: {
-  //         [HttpStatusCode.OK_200]: response({ body: z.string() }),
+  //         [s.OK_200]: response({ body: z.string() }),
   //       },
   //     }),
   //     GET: {}, // "GET" is not allowed because it's value is not an endpoint
@@ -101,7 +101,7 @@ export const pokemonApiContract = apiContract({
   //         name: z.string(),
   //       }),
   //       responses: {
-  //         ["InexistantHttpResponseCode"]: response({
+  //         ["InexistantHttpResponseCode"]: response({ // will error because "InexistantHttpResponseCode" is not a valid HTTP status code
   //           body: z.object({
   //             list: z.array(PokemonSchema),
   //             total: z.number().int(),
