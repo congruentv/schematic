@@ -83,7 +83,7 @@ type NavigateToEndpoint<TDef, TSegments extends readonly string[]> = TSegments e
 
 export function path<
   TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
-  TPath extends MethodFirstPath<TApiDef>
+  const TPath extends MethodFirstPath<TApiDef>
 >(
   apiReg: ApiHandlersRegistry<TApiDef>,
   path: TPath
@@ -102,7 +102,7 @@ export function path<
   const pathSegments = urlPath.split('/').filter((segment: string) => segment.length > 0);
   
   // Navigate through the API registry to find the endpoint
-  return routeByPathSegments(apiReg, pathSegments, method);
+  return routeByPathSegments(apiReg, pathSegments, method) as MethodEndpointHandlerRegistryEntry<ExtractEndpointFromPath<TApiDef, TPath>>;
 }
 
 export type MethodFirstPath<TDef, BasePath extends string = ""> = {

@@ -26,13 +26,18 @@ const pokemons: Pokemon[] = [
 
 const api = new ApiHandlersRegistry(pokemonApiContract);
 
-//const endp1 = path(api, '/pokemon/:id/DELETE');
-const endp2 = path(api, 'GET /pokemon/:id');
-//const endp3 = path(pokemonApiContract, 'GET /pokemon/:id');
-const endp4 = path(api, 'PATCH /pokemon/:id');
-//api.pokemon[':id'].GET.
-
 register(app, api.pokemon.GET, async ({ query }) => {
+  return {
+    code: HttpStatusCode.OK_200,
+    body: {
+      list: pokemons.slice(query.skip, query.take + query.skip),
+      total: pokemons.length,
+    },
+  };
+});
+
+const endpGetAllPokemons = path(api, 'GET /pokemon');
+register(app, endpGetAllPokemons, async ({ query }) => {
   return {
     code: HttpStatusCode.OK_200,
     body: {
@@ -51,9 +56,10 @@ register(app, api.pokemon[':id'].GET, async ({ pathParams, headers }) => {
   return { code: HttpStatusCode.OK_200, body: pokemon };
 });
 
+// Path function (useful for dynamic routing)
 const endpGetPokemonById = path(api, 'GET /pokemon/:id');
 register(app, endpGetPokemonById, async ({ pathParams, headers }) => {
-  console.log('Headers:', headers);
+  console.log('Headers from path function:', headers);
   const pokemon = pokemons.find(p => p.id.toString() === pathParams.id);
   if (!pokemon) {
     return { code: HttpStatusCode.NotFound_404, body: { userMessage: `Pokemon with ID ${pathParams.id} not found` } };
