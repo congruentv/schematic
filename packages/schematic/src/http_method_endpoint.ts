@@ -18,7 +18,7 @@ export type ValidateHttpMethodEndpointDefinition<TDef extends IHttpMethodEndpoin
   responses: {
     [K in keyof TDef['responses']]: K extends HttpStatusCode
       ? TDef['responses'][K] extends HttpMethodEndpointResponse<infer TStatus, infer TResponseDef>
-        ? HttpMethodEndpointResponse<TStatus, TResponseDef> // OK: response under status code key
+        ? HttpMethodEndpointResponse<TStatus, TResponseDef>
         : "❌ ERROR: HttpMethodEndpointResponse only allowed on HttpStatusCode key"
       : "❌ ERROR: HttpMethodEndpointResponse only allowed on HttpStatusCode key"
   }

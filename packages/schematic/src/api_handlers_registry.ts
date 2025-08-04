@@ -117,7 +117,7 @@ class InnerApiHandlersRegistry<TDef extends IApiContractDefinition & ValidateApi
 }
 
 export function routeByPathSegments<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>>(
-  registrar: InnerApiHandlersRegistry<TDef>,
+  registrar: ApiHandlersRegistry<TDef>,
   pathSegments: readonly string[],
   method: HttpMethod
 ): MethodEndpointHandlerRegistryEntry<any> {
