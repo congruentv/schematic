@@ -1,7 +1,6 @@
 import { ApiContract, IApiContractDefinition, ValidateApiContractDefinition } from "./api_contract.js";
 import { IHttpMethodEndpointDefinition, HttpMethodEndpoint, ValidateHttpMethodEndpointDefinition } from "./http_method_endpoint.js";
 import { HttpMethodEndpointHandler } from "./http_method_endpoint_handler.js";
-import { HttpMethod } from "./http_method_type.js";
 import { HttpStatusCode } from "./http_status_code.js";
 
 export class MethodEndpointHandlerRegistryEntry<TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>> {
@@ -114,31 +113,6 @@ class InnerApiHandlersRegistry<TDef extends IApiContractDefinition & ValidateApi
       }
     }
   }
-}
-
-export function routeByPathSegments<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>>(
-  registrar: InnerApiHandlersRegistry<TDef>,
-  pathSegments: readonly string[],
-  method: HttpMethod
-): MethodEndpointHandlerRegistryEntry<any> {
-  let current: any = registrar;
-  for (const segment of pathSegments) {
-    if (current[segment] instanceof MethodEndpointHandlerRegistryEntry) {
-      current = current[segment];
-    } else if (typeof current[segment] === 'object') {
-      current = current[segment];
-    } else {
-      throw new Error(`Path segment "${segment}" not found in API handlers registrar`);
-    }
-  }
-  if (!(method in current)) {
-    throw new Error(`Method "${method}" not found for path "${pathSegments.join('/')}"`);
-  }
-  if (!(current[method] instanceof MethodEndpointHandlerRegistryEntry)) {
-    throw new Error(`Method "${method}" is not a valid endpoint handler for path "${pathSegments.join('/')}"`);
-  }
-  current = current[method];
-  return current;
 }
 
 export type ApiHandlersRegistryDef<ObjType extends object> = {

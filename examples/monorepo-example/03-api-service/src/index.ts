@@ -3,8 +3,8 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 
 import { ApiHandlersRegistry } from '@congruentv/schematic';
-import { HttpStatusCode } from '@congruentv/schematic';
-import { register } from '@congruentv/schematic-adapter-express';
+import { HttpStatusCode, route } from '@congruentv/schematic';
+import { register, registerByPath } from '@congruentv/schematic-adapter-express';
 
 import { 
   pokemonApiContract, 
@@ -24,56 +24,56 @@ const pokemons: Pokemon[] = [
   { id: 6, name: 'Charizard', description: 'Fire type', type: 'fire' },
 ];
 
-const pokemonApi = new ApiHandlersRegistry(pokemonApiContract);
+const api = new ApiHandlersRegistry(pokemonApiContract);
 
-register(app, pokemonApi.pokemon.GET, async ({ query }) => {
+register(app, api.pokemon.GET, async (req) => {
   return {
     code: HttpStatusCode.OK_200,
     body: {
-      list: pokemons.slice(query.skip, query.take + query.skip),
+      list: pokemons.slice(req.query.skip, req.query.take + req.query.skip),
       total: pokemons.length,
     },
   };
 });
 
-register(app, pokemonApi.pokemon[':id'].GET, async ({ pathParams, headers }) => {
-  console.log('Headers:', headers);
-  const pokemon = pokemons.find(p => p.id.toString() === pathParams.id);
+register(app, api.pokemon[':id'].GET, async (req) => {
+  console.log('Headers:', req.headers);
+  const pokemon = pokemons.find(p => p.id.toString() === req.pathParams.id);
   if (!pokemon) {
-    return { code: HttpStatusCode.NotFound_404, body: { userMessage: `Pokemon with ID ${pathParams.id} not found` } };
+    return { code: HttpStatusCode.NotFound_404, body: { userMessage: `Pokemon with ID ${req.pathParams.id} not found` } };
   }
   return { code: HttpStatusCode.OK_200, body: pokemon };
 });
 
-register(app, pokemonApi.pokemon[':id'].DELETE, async ({ pathParams }) => {
-  const pokemon = pokemons.find(p => p.id.toString() === pathParams.id);
+registerByPath(app, api, 'PATCH /pokemon/:id', async (req) => {
+  const pokemon = pokemons.find(p => p.id.toString() === req.pathParams.id);
   if (!pokemon) {
-    return { code: HttpStatusCode.NotFound_404, body: { userMessage: `Pokemon with ID ${pathParams.id} not found` } };
+    return { code: HttpStatusCode.NotFound_404, body: { userMessage: `Pokemon with ID ${req.pathParams.id} not found` } };
   }
-  pokemons.splice(pokemons.indexOf(pokemon), 1);
+  Object.assign(pokemon, req.body);
   return { code: HttpStatusCode.NoContent_204 };
 });
 
-register(app, pokemonApi.pokemon[':id'].PATCH, async ({ pathParams, body }) => {
-  const pokemon = pokemons.find(p => p.id.toString() === pathParams.id);
-  if (!pokemon) {
-    return { code: HttpStatusCode.NotFound_404, body: { userMessage: `Pokemon with ID ${pathParams.id} not found` } };
-  }
-  Object.assign(pokemon, body);
-  return { code: HttpStatusCode.NoContent_204 };
-});
-
-register(app, pokemonApi.pokemon.POST, async ({ headers, body }) => {
-  console.log('Headers:', headers);
+registerByPath(app, api, 'POST /pokemon', async (req) => {
+  console.log('Headers:', req.headers);
   const newPokemon = {
     id: pokemons.length + 1,
-    ...body,
+    ...req.body,
   };
   pokemons.push(newPokemon);
   return {
     code: HttpStatusCode.Created_201,
     body: newPokemon.id,
   };
+});
+
+register(app, route(api, 'DELETE /pokemon/:id'), async (req) => {
+  const pokemon = pokemons.find(p => p.id.toString() === req.pathParams.id);
+  if (!pokemon) {
+    return { code: HttpStatusCode.NotFound_404, body: { userMessage: `Pokemon with ID ${req.pathParams.id} not found` } };
+  }
+  pokemons.splice(pokemons.indexOf(pokemon), 1);
+  return { code: HttpStatusCode.NoContent_204 };
 });
 
 app.listen(3000, () => {

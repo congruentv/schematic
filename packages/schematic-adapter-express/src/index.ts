@@ -4,8 +4,27 @@ import {
   MethodEndpointHandlerRegistryEntry, 
   IHttpMethodEndpointDefinition,
   type LowerCasedHttpMethod,
-  ValidateHttpMethodEndpointDefinition
+  ValidateHttpMethodEndpointDefinition,
+  route,
+  MethodFirstPath,
+  ExtractEndpointFromPath,
+  ApiHandlersRegistry,
+  IApiContractDefinition,
+  ValidateApiContractDefinition
 } from '@congruentv/schematic';
+
+export function registerByPath<
+  const TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
+  const TPath extends MethodFirstPath<TApiDef>
+>(
+  app: Express, 
+  apiReg: ApiHandlersRegistry<TApiDef>,
+  path: TPath,
+  handler: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>>
+) {
+  const endpointEntry = route(apiReg, path);
+  return register(app, endpointEntry, handler);
+}
 
 export function register<const TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>>(
   app: Express, 
@@ -29,3 +48,4 @@ export function register<const TDef extends IHttpMethodEndpointDefinition & Vali
     res.status(result.code).json(result.body);
   });
 }
+  
