@@ -28,6 +28,26 @@ export const NotFoundSchema = z.object({
 });
 
 export const pokemonApiContract = apiContract({
+  ['hello-simple']: {
+    [':name']: {
+      GET: endpoint({
+        responses: {
+          [s.OK_200]: response({ body: z.string() }),
+        },
+      }),
+    }
+  },
+  hello: {
+    [':name']: {
+      [':preferred-greeting']: {
+        GET: endpoint({
+          responses: {
+            [s.OK_200]: response({ body: z.string() }),
+          },
+        }),
+      }
+    }
+  },
   pokemon: {
     GET: endpoint({
       query: z.object({

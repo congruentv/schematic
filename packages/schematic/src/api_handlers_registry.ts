@@ -9,7 +9,10 @@ export function createRegistry<TDef extends IApiContractDefinition & ValidateApi
   return new ApiHandlersRegistry<TDef>(contract);
 }
 
-export class MethodEndpointHandlerRegistryEntry<TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>> {
+export class MethodEndpointHandlerRegistryEntry<
+  TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
+  TPathParams extends string = never
+> {
   private _methodEndpoint: HttpMethodEndpoint<TDef>;
   get methodEndpoint(): HttpMethodEndpoint<TDef> {
     return this._methodEndpoint;
@@ -19,8 +22,8 @@ export class MethodEndpointHandlerRegistryEntry<TDef extends IHttpMethodEndpoint
     this._methodEndpoint = methodEndpoint;
   }
 
-  private _handler: HttpMethodEndpointHandler<TDef> | null = null;
-  handle(handler: HttpMethodEndpointHandler<TDef>): void {
+  private _handler: HttpMethodEndpointHandler<TDef, TPathParams> | null = null;
+  handle(handler: HttpMethodEndpointHandler<TDef, TPathParams>): void {
     this._handler = handler;
   }
 
@@ -88,7 +91,7 @@ export class MethodEndpointHandlerRegistryEntry<TDef extends IHttpMethodEndpoint
       genericPath: this._methodEndpoint.genericPath,
       pathSegments: this._methodEndpoint.pathSegments,
       headers: data.headers,
-      pathParams: data.pathParams, 
+      pathParams: data.pathParams as any, // Type assertion needed here for runtime compatibility 
       query: data.query as any, 
       body: data.body as any
     });
@@ -121,13 +124,15 @@ class InnerApiHandlersRegistry<TDef extends IApiContractDefinition & ValidateApi
   }
 }
 
-export type ApiHandlersRegistryDef<ObjType extends object> = {
+export type ApiHandlersRegistryDef<ObjType extends object, TPathParams extends string = never> = {
   [Key in keyof ObjType]: ObjType[Key] extends HttpMethodEndpoint<infer TMethodEndpointDef>
-    ? MethodEndpointHandlerRegistryEntry<TMethodEndpointDef>
+    ? MethodEndpointHandlerRegistryEntry<TMethodEndpointDef, TPathParams>
     : ObjType[Key] extends object
-      ? ApiHandlersRegistryDef<ObjType[Key]>
+      ? Key extends `:${infer ParamName}`
+        ? ApiHandlersRegistryDef<ObjType[Key], TPathParams | ParamName>
+        : ApiHandlersRegistryDef<ObjType[Key], TPathParams>
       : ObjType[Key];
 }
 
-export type ApiHandlersRegistry<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>> = ApiHandlersRegistryDef<InnerApiHandlersRegistry<TDef> & TDef>;
+export type ApiHandlersRegistry<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>> = ApiHandlersRegistryDef<InnerApiHandlersRegistry<TDef> & TDef, never>;
 export const ApiHandlersRegistry: new <TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>>(contract: ApiContract<TDef>) => ApiHandlersRegistry<TDef> = InnerApiHandlersRegistry as any;

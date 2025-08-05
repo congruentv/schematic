@@ -10,3 +10,4 @@ export * from "./api_routing.js";
 export * from "./api_client.js";
 export * from "./api_client_http_method_call.js";
 export * from "./http_status_code.js";
+export * from "./path_params_extractor.js";

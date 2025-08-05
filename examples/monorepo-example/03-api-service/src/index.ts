@@ -26,6 +26,20 @@ const pokemons: Pokemon[] = [
 
 const api = createRegistry(pokemonApiContract);
 
+register(app, api['hello-simple'][':name'].GET, async (req) => {
+  return {
+    code: HttpStatusCode.OK_200,
+    body: `Hello ${req.pathParams.name}!`
+  };
+});
+
+register(app, api['hello'][':name'][':preferred-greeting'].GET, async (req) => {
+  return {
+    code: HttpStatusCode.OK_200,
+    body: `Hello ${req.pathParams.name}, ${req.pathParams['preferred-greeting']}!`
+  };
+});
+
 register(app, api.pokemon.GET, async (req) => {
   return {
     code: HttpStatusCode.OK_200,
