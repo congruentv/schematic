@@ -18,12 +18,12 @@ function isApiContractDefinition(obj: any): obj is IApiContractDefinition {
 export type ValidateApiContractDefinition<T> = {
   [K in keyof T]: T[K] extends HttpMethodEndpoint<infer TEndpDef>
     ? K extends HttpMethod
-      ? HttpMethodEndpoint<TEndpDef> // OK: endpoint under method key
+      ? HttpMethodEndpoint<TEndpDef>
       : "❌ ERROR: HttpMethodEndpoint only allowed on HttpMethod key"
     : K extends HttpMethod
       ? " ❌ ERROR: method key must hold an HttpMethodEndpoint"
       : T[K] extends object
-        ? ValidateApiContractDefinition<T[K]> // recurse for non-method key
+        ? ValidateApiContractDefinition<T[K]>
         : T[K];
 };
 
