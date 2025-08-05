@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 
-import { ApiHandlersRegistry } from '@congruentv/schematic';
+import { createRegistry } from '@congruentv/schematic';
 import { HttpStatusCode, route } from '@congruentv/schematic';
 import { register, registerByPath } from '@congruentv/schematic-adapter-express';
 
@@ -24,7 +24,7 @@ const pokemons: Pokemon[] = [
   { id: 6, name: 'Charizard', description: 'Fire type', type: 'fire' },
 ];
 
-const api = new ApiHandlersRegistry(pokemonApiContract);
+const api = createRegistry(pokemonApiContract);
 
 register(app, api.pokemon.GET, async (req) => {
   return {

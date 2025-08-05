@@ -3,6 +3,12 @@ import { IHttpMethodEndpointDefinition, HttpMethodEndpoint, ValidateHttpMethodEn
 import { HttpMethodEndpointHandler } from "./http_method_endpoint_handler.js";
 import { HttpStatusCode } from "./http_status_code.js";
 
+export function createRegistry<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>>(
+  contract: ApiContract<TDef>
+) {
+  return new ApiHandlersRegistry<TDef>(contract);
+}
+
 export class MethodEndpointHandlerRegistryEntry<TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>> {
   private _methodEndpoint: HttpMethodEndpoint<TDef>;
   get methodEndpoint(): HttpMethodEndpoint<TDef> {
