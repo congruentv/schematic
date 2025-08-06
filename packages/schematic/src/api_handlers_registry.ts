@@ -3,13 +3,18 @@ import { IHttpMethodEndpointDefinition, HttpMethodEndpoint, ValidateHttpMethodEn
 import { HttpMethodEndpointHandler } from "./http_method_endpoint_handler.js";
 import { HttpStatusCode } from "./http_status_code.js";
 
-export function createRegistry<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>>(
+export function createRegistry<
+  TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>
+>(
   contract: ApiContract<TDef>
 ) {
   return new ApiHandlersRegistry<TDef>(contract);
 }
 
-export class MethodEndpointHandlerRegistryEntry<TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>> {
+export class MethodEndpointHandlerRegistryEntry<
+  TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
+  TPathParams extends string
+> {
   private _methodEndpoint: HttpMethodEndpoint<TDef>;
   get methodEndpoint(): HttpMethodEndpoint<TDef> {
     return this._methodEndpoint;
@@ -19,8 +24,8 @@ export class MethodEndpointHandlerRegistryEntry<TDef extends IHttpMethodEndpoint
     this._methodEndpoint = methodEndpoint;
   }
 
-  private _handler: HttpMethodEndpointHandler<TDef> | null = null;
-  handle(handler: HttpMethodEndpointHandler<TDef>): void {
+  private _handler: HttpMethodEndpointHandler<TDef, TPathParams> | null = null;
+  handle(handler: HttpMethodEndpointHandler<TDef, TPathParams>): void {
     this._handler = handler;
   }
 
@@ -88,7 +93,7 @@ export class MethodEndpointHandlerRegistryEntry<TDef extends IHttpMethodEndpoint
       genericPath: this._methodEndpoint.genericPath,
       pathSegments: this._methodEndpoint.pathSegments,
       headers: data.headers,
-      pathParams: data.pathParams, 
+      pathParams: data.pathParams as any, 
       query: data.query as any, 
       body: data.body as any
     });
@@ -121,13 +126,29 @@ class InnerApiHandlersRegistry<TDef extends IApiContractDefinition & ValidateApi
   }
 }
 
-export type ApiHandlersRegistryDef<ObjType extends object> = {
-  [Key in keyof ObjType]: ObjType[Key] extends HttpMethodEndpoint<infer TMethodEndpointDef>
-    ? MethodEndpointHandlerRegistryEntry<TMethodEndpointDef>
-    : ObjType[Key] extends object
-      ? ApiHandlersRegistryDef<ObjType[Key]>
-      : ObjType[Key];
+export type ApiHandlersRegistryDef<
+  ObjType extends object, 
+  TPathParams extends string
+> = {
+  [Key in keyof ObjType]: Key extends `:${infer ParamName}`
+    ? ObjType[Key] extends HttpMethodEndpoint<infer TMethodEndpointDef>
+      ? MethodEndpointHandlerRegistryEntry<TMethodEndpointDef, `${TPathParams}:${ParamName}`>
+      : ObjType[Key] extends object
+        ? ApiHandlersRegistryDef<ObjType[Key], `${TPathParams}:${ParamName}`>
+        : ObjType[Key]
+    : ObjType[Key] extends HttpMethodEndpoint<infer TMethodEndpointDef>
+      ? MethodEndpointHandlerRegistryEntry<TMethodEndpointDef, TPathParams>
+      : ObjType[Key] extends object
+        ? ApiHandlersRegistryDef<ObjType[Key], TPathParams>
+        : ObjType[Key];
 }
 
-export type ApiHandlersRegistry<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>> = ApiHandlersRegistryDef<InnerApiHandlersRegistry<TDef> & TDef>;
-export const ApiHandlersRegistry: new <TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>>(contract: ApiContract<TDef>) => ApiHandlersRegistry<TDef> = InnerApiHandlersRegistry as any;
+export type ApiHandlersRegistry<
+  TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>, 
+  TPathParams extends string = ""
+> = ApiHandlersRegistryDef<InnerApiHandlersRegistry<TDef> & TDef, TPathParams>;
+
+export const ApiHandlersRegistry: new <
+  TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>, 
+  TPathParams extends string = ""
+>(contract: ApiContract<TDef>) => ApiHandlersRegistry<TDef, TPathParams> = InnerApiHandlersRegistry as any;

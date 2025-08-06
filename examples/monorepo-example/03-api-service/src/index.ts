@@ -26,7 +26,60 @@ const pokemons: Pokemon[] = [
 
 const api = createRegistry(pokemonApiContract);
 
+// register(app, api.greet[':name'].GET, async (req) => {
+//   const name = req.pathParams.name;
+//   return {
+//     code: HttpStatusCode.OK_200,
+//     body: `Hello, ${name}!`,
+//   };
+// });
+
+// register(app, api.greet[':name'].preferred[':salute'].GET, async (req) => {
+//   const name = req.pathParams.name;
+//   const salute = req.pathParams.salute;
+//   return {
+//     code: HttpStatusCode.OK_200,
+//     body: `${salute}, ${name}!`,
+//   };
+// });
+
+// register(app, api.greet[':name']['preferred-salute'][':salute'].GET, async (req) => {
+//   const name = req.pathParams.name;
+//   const salute = req.pathParams.salute;
+//   return {
+//     code: HttpStatusCode.OK_200,
+//     body: `${salute}, ${name}!`,
+//   };
+// });
+
+registerByPath(app, api, 'GET /greet/:name', async (req) => {
+  const name = req.pathParams.name;
+  return {
+    code: HttpStatusCode.OK_200,
+    body: `Hello, ${name}!`,
+  };
+});
+
+registerByPath(app, api, 'GET /greet/:name/preferred/:salute', async (req) => {
+  const name = req.pathParams.name;
+  const salute = req.pathParams.salute;
+  return {
+    code: HttpStatusCode.OK_200,
+    body: `${salute}, ${name}!`,
+  };
+});
+
+registerByPath(app, api, 'GET /greet/:name/preferred-salute/:salute', async (req) => {
+  const name = req.pathParams.name;
+  const salute = req.pathParams.salute;
+  return {
+    code: HttpStatusCode.OK_200,
+    body: `${salute}, ${name}!`,
+  };
+});
+
 register(app, api.pokemon.GET, async (req) => {
+  req.pathParams
   return {
     code: HttpStatusCode.OK_200,
     body: {
