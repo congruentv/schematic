@@ -15,21 +15,25 @@ import {
 
 export function registerByPath<
   const TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
-  const TPath extends MethodFirstPath<TApiDef>
+  const TPath extends MethodFirstPath<TApiDef>,
+  TPathParams extends string
 >(
   app: Express, 
-  apiReg: ApiHandlersRegistry<TApiDef>,
+  apiReg: ApiHandlersRegistry<TApiDef, TPathParams>,
   path: TPath,
-  handler: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>>
+  handler: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, TPathParams>
 ) {
   const endpointEntry = route(apiReg, path);
   return register(app, endpointEntry, handler);
 }
 
-export function register<const TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>>(
+export function register<
+  const TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
+  TPathParams extends string
+>(
   app: Express, 
-  endpointEntry: MethodEndpointHandlerRegistryEntry<TDef>,
-  handler: HttpMethodEndpointHandler<TDef>
+  endpointEntry: MethodEndpointHandlerRegistryEntry<TDef, TPathParams>,
+  handler: HttpMethodEndpointHandler<TDef, TPathParams>
 ) {
   endpointEntry.handle(handler);
   const { genericPath } = endpointEntry.methodEndpoint;

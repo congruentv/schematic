@@ -27,6 +27,7 @@ const pokemons: Pokemon[] = [
 const api = createRegistry(pokemonApiContract);
 
 register(app, api.pokemon.GET, async (req) => {
+  req.pathParams
   return {
     code: HttpStatusCode.OK_200,
     body: {
