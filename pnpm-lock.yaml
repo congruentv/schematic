@@ -31,8 +31,8 @@ catalogs:
       specifier: ^4.20.3
       version: 4.20.3
     typescript:
-      specifier: 5.8.3
-      version: 5.8.3
+      specifier: ^5.9.2
+      version: 5.9.2
     zod:
       specifier: ^4.0.10
       version: 4.0.10
@@ -141,7 +141,7 @@ importers:
         version: 4.20.3
       typescript:
         specifier: 'catalog:'
-        version: 5.8.3
+        version: 5.9.2
 
   examples/monorepo-example/04-node-client:
     dependencies:
@@ -160,7 +160,7 @@ importers:
         version: 4.20.3
       typescript:
         specifier: 'catalog:'
-        version: 5.8.3
+        version: 5.9.2
 
   packages/schematic:
     dependencies:
@@ -170,10 +170,10 @@ importers:
     devDependencies:
       pkgroll:
         specifier: 'catalog:'
-        version: 2.14.5(typescript@5.8.3)
+        version: 2.14.5(typescript@5.9.2)
       typescript:
         specifier: 'catalog:'
-        version: 5.8.3
+        version: 5.9.2
 
   packages/schematic-adapter-express:
     dependencies:
@@ -195,10 +195,10 @@ importers:
         version: 5.1.0
       pkgroll:
         specifier: 'catalog:'
-        version: 2.14.5(typescript@5.8.3)
+        version: 2.14.5(typescript@5.9.2)
       typescript:
         specifier: 'catalog:'
-        version: 5.8.3
+        version: 5.9.2
 
   packages/schematic-adapter-fetch:
     dependencies:
@@ -208,10 +208,10 @@ importers:
     devDependencies:
       pkgroll:
         specifier: 'catalog:'
-        version: 2.14.5(typescript@5.8.3)
+        version: 2.14.5(typescript@5.9.2)
       typescript:
         specifier: 'catalog:'
-        version: 5.8.3
+        version: 5.9.2
 
 packages:
 
@@ -1874,6 +1874,11 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
+  typescript@5.9.2:
+    resolution: {integrity: sha512-CWBzXQrc/qOkhidw1OzBTQuYRbfyxDXJMVJ1XNwUHGROVmuaeiEm3OslpZ1RV96d7SKKjZKrSJu3+t/xlw3R9A==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
   undici-types@7.8.0:
     resolution: {integrity: sha512-9UJ2xGDvQ43tYyVMpuHlsgApydB8ZKfVYTsLDhXkFL/6gfkp+U8xTGdh8pMJv1SpZna0zxG1DwsKZsreLbXBxw==}
 
@@ -3415,7 +3420,7 @@ snapshots:
 
   pify@4.0.1: {}
 
-  pkgroll@2.14.5(typescript@5.8.3):
+  pkgroll@2.14.5(typescript@5.9.2):
     dependencies:
       '@rollup/plugin-alias': 5.1.1(rollup@4.46.0)
       '@rollup/plugin-commonjs': 28.0.6(rollup@4.46.0)
@@ -3429,7 +3434,7 @@ snapshots:
       rollup: 4.46.0
       rollup-pluginutils: 2.8.2
     optionalDependencies:
-      typescript: 5.8.3
+      typescript: 5.9.2
 
   postcss@8.5.6:
     dependencies:
@@ -3691,6 +3696,8 @@ snapshots:
       - supports-color
 
   typescript@5.8.3: {}
+
+  typescript@5.9.2: {}
 
   undici-types@7.8.0: {}
 
