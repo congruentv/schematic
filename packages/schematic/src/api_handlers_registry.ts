@@ -5,7 +5,7 @@ import { HttpStatusCode } from "./http_status_code.js";
 
 export function createRegistry<
   TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>,
-  TPathParams extends string = ':foo'
+  TPathParams extends string
 >(
   contract: ApiContract<TDef>
 ) {
