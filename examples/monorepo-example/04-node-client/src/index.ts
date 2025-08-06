@@ -10,6 +10,27 @@ const client = createClient(pokemonApiContract, {
   }),
 });
 
+console.log('Greeting...');
+const greetResponse = await client.greet.name('Ash').GET();
+if (greetResponse.code !== HttpStatusCode.OK_200) {
+  throw new Error(`Failed to greet: ${greetResponse.body}`);
+}
+console.log('Response:', greetResponse.body);
+
+console.log('Greeting with preferred salute...');
+const greetSaluteResponse = await client.greet.name('Ash').preferred.salute('Ola').GET();
+if (greetSaluteResponse.code !== HttpStatusCode.OK_200) {
+  throw new Error(`Failed to greet with salute: ${greetSaluteResponse.body}`);
+}
+console.log('Response:', greetSaluteResponse.body);
+
+console.log('Greeting with preferred salute 2...');
+const greetSaluteResponse2 = await client.greet.name('Ash')['preferred-salute'].salute('Ola').GET();
+if (greetSaluteResponse2.code !== HttpStatusCode.OK_200) {
+  throw new Error(`Failed to greet with salute: ${greetSaluteResponse2.body}`);
+}
+console.log('Response:', greetSaluteResponse2.body);
+
 // listing all Pokemons
 console.log('Fetching all Pokemons...');
 const listResponse = await client.pokemon.GET({

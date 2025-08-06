@@ -8,6 +8,7 @@ import {
   route,
   MethodFirstPath,
   ExtractEndpointFromPath,
+  ExtractPathParamsFromPath,
   ApiHandlersRegistry,
   IApiContractDefinition,
   ValidateApiContractDefinition
@@ -15,13 +16,12 @@ import {
 
 export function registerByPath<
   const TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
-  const TPath extends MethodFirstPath<TApiDef>,
-  TPathParams extends string
+  const TPath extends MethodFirstPath<TApiDef>
 >(
   app: Express, 
-  apiReg: ApiHandlersRegistry<TApiDef, TPathParams>,
+  apiReg: ApiHandlersRegistry<TApiDef, "">,
   path: TPath,
-  handler: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, TPathParams>
+  handler: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, ExtractPathParamsFromPath<TPath>>
 ) {
   const endpointEntry = route(apiReg, path);
   return register(app, endpointEntry, handler);

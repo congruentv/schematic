@@ -2,15 +2,15 @@ import { IApiContractDefinition, ValidateApiContractDefinition } from "./api_con
 import { ApiHandlersRegistry, MethodEndpointHandlerRegistryEntry } from "./api_handlers_registry.js";
 import { HttpMethodEndpoint } from "./http_method_endpoint.js";
 import { HttpMethod } from "./http_method_type.js";
+import { ExtractPathParamsFromPath } from "./typed_path_params.js";
 
 export function route<
   TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
-  const TPath extends MethodFirstPath<TApiDef>,
-  const TPathParams extends string
+  const TPath extends MethodFirstPath<TApiDef>
 >(
-  apiReg: ApiHandlersRegistry<TApiDef, TPathParams>,
+  apiReg: ApiHandlersRegistry<TApiDef, "">,
   path: TPath
-): MethodEndpointHandlerRegistryEntry<ExtractEndpointFromPath<TApiDef, TPath>, TPathParams> {
+): MethodEndpointHandlerRegistryEntry<ExtractEndpointFromPath<TApiDef, TPath>, ExtractPathParamsFromPath<TPath>> {
   const pathStr = path as string;
   const spaceIndex = pathStr.indexOf(' ');
   if (spaceIndex === -1) {
@@ -19,7 +19,7 @@ export function route<
   const method = pathStr.substring(0, spaceIndex) as HttpMethod;
   const urlPath = pathStr.substring(spaceIndex + 1);
   const pathSegments = urlPath.split('/').filter((segment: string) => segment.length > 0);
-  return routeByPathSegments(apiReg, pathSegments, method) as MethodEndpointHandlerRegistryEntry<ExtractEndpointFromPath<TApiDef, TPath>, TPathParams>;
+  return routeByPathSegments(apiReg, pathSegments, method) as MethodEndpointHandlerRegistryEntry<ExtractEndpointFromPath<TApiDef, TPath>, ExtractPathParamsFromPath<TPath>>;
 }
 
 export function routeByPathSegments<

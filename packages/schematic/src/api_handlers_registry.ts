@@ -5,7 +5,7 @@ import { HttpStatusCode } from "./http_status_code.js";
 
 export function createRegistry<
   TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>,
-  TPathParams extends string
+  TPathParams extends string = ""
 >(
   contract: ApiContract<TDef>
 ) {
@@ -133,9 +133,9 @@ export type ApiHandlersRegistryDef<
 > = {
   [Key in keyof ObjType]: Key extends `:${infer ParamName}`
     ? ObjType[Key] extends HttpMethodEndpoint<infer TMethodEndpointDef>
-      ? MethodEndpointHandlerRegistryEntry<TMethodEndpointDef, `${TPathParams}:${ParamName}`>
+      ? MethodEndpointHandlerRegistryEntry<TMethodEndpointDef, TPathParams extends "" ? `:${ParamName}` : `${TPathParams}:${ParamName}`>
       : ObjType[Key] extends object
-        ? ApiHandlersRegistryDef<ObjType[Key], `${TPathParams}:${ParamName}`>
+        ? ApiHandlersRegistryDef<ObjType[Key], TPathParams extends "" ? `:${ParamName}` : `${TPathParams}:${ParamName}`>
         : ObjType[Key]
     : ObjType[Key] extends HttpMethodEndpoint<infer TMethodEndpointDef>
       ? MethodEndpointHandlerRegistryEntry<TMethodEndpointDef, TPathParams>
