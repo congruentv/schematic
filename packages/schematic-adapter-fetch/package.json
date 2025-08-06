@@ -1,6 +1,6 @@
 {
   "name": "@congruentv/schematic-adapter-fetch",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Typescript schema-first tooling for modern typed REST APIs and Ops.",
   "keywords": [],
   "author": "congruentv",

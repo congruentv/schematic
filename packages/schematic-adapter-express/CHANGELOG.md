@@ -1,5 +1,16 @@
 # @congruentv/schematic-adapter-express
 
+## 0.5.0
+
+### Minor Changes
+
+- Big improvements
+
+### Patch Changes
+
+- Updated dependencies
+  - @congruentv/schematic@0.5.0
+
 ## 0.4.0
 
 ### Minor Changes
