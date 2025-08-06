@@ -4,7 +4,7 @@ import bodyParser from 'body-parser';
 
 import { createRegistry } from '@congruentv/schematic';
 import { HttpStatusCode, route } from '@congruentv/schematic';
-import { register, registerByPath } from '@congruentv/schematic-adapter-express';
+import { register } from '@congruentv/schematic-adapter-express';
 
 import { 
   pokemonApiContract, 
@@ -52,7 +52,7 @@ const api = createRegistry(pokemonApiContract);
 //   };
 // });
 
-registerByPath(app, api, 'GET /greet/:name', async (req) => {
+register(app, api, 'GET /greet/:name', async (req) => {
   const name = req.pathParams.name;
   return {
     code: HttpStatusCode.OK_200,
@@ -60,7 +60,7 @@ registerByPath(app, api, 'GET /greet/:name', async (req) => {
   };
 });
 
-registerByPath(app, api, 'GET /greet/:name/preferred/:salute', async (req) => {
+register(app, api, 'GET /greet/:name/preferred/:salute', async (req) => {
   const name = req.pathParams.name;
   const salute = req.pathParams.salute;
   return {
@@ -69,7 +69,7 @@ registerByPath(app, api, 'GET /greet/:name/preferred/:salute', async (req) => {
   };
 });
 
-registerByPath(app, api, 'GET /greet/:name/preferred-salute/:salute', async (req) => {
+register(app, api, 'GET /greet/:name/preferred-salute/:salute', async (req) => {
   const name = req.pathParams.name;
   const salute = req.pathParams.salute;
   return {
@@ -98,7 +98,7 @@ register(app, api.pokemon[':id'].GET, async (req) => {
   return { code: HttpStatusCode.OK_200, body: pokemon };
 });
 
-registerByPath(app, api, 'PATCH /pokemon/:id', async (req) => {
+register(app, api, 'PATCH /pokemon/:id', async (req) => {
   const pokemon = pokemons.find(p => p.id.toString() === req.pathParams.id);
   if (!pokemon) {
     return { code: HttpStatusCode.NotFound_404, body: { userMessage: `Pokemon with ID ${req.pathParams.id} not found` } };
@@ -107,7 +107,7 @@ registerByPath(app, api, 'PATCH /pokemon/:id', async (req) => {
   return { code: HttpStatusCode.NoContent_204 };
 });
 
-registerByPath(app, api, 'POST /pokemon', async (req) => {
+register(app, api, 'POST /pokemon', async (req) => {
   console.log('Headers:', req.headers);
   const newPokemon = {
     id: pokemons.length + 1,
