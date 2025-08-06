@@ -8,7 +8,7 @@ import {
   route,
   MethodFirstPath,
   ExtractEndpointFromPath,
-  ExtractPathParamsFromPath,
+  ExtractTypedParamsFromMethodFirstPath,
   ApiHandlersRegistry,
   IApiContractDefinition,
   ValidateApiContractDefinition
@@ -21,7 +21,7 @@ export function registerByPath<
   app: Express, 
   apiReg: ApiHandlersRegistry<TApiDef, "">,
   path: TPath,
-  handler: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, ExtractPathParamsFromPath<TPath>>
+  handler: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, ExtractTypedParamsFromMethodFirstPath<TPath>>
 ) {
   const endpointEntry = route(apiReg, path);
   return register(app, endpointEntry, handler);
@@ -42,7 +42,7 @@ export function register<
     const pathParams = req.params;
     const query = req.query;
     const body = req.body;
-    const headers = JSON.parse(JSON.stringify(req.headers)); // Convert headers to a plain object
+    const headers = JSON.parse(JSON.stringify(req.headers)); // TODO
     const result = await endpointEntry.trigger({
       headers,
       pathParams,

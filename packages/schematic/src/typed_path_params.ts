@@ -1,3 +1,20 @@
+/**
+ * Extracts typed path parameters from a path string.
+ * For example, given a path string like ":p1:p2:...:pn", it will return an object type with properties for each parameter.
+ * 
+ * @template TPathParams - The path parameters string, e.g., ":id:name:age".
+ * @returns An object type with properties for each parameter.
+ * 
+ * @example
+ * ```
+ * const typedParams: TypedPathParams<':id:name'> = {
+ *   id: '1',
+ *   name: 'Bulbasaur'
+ * };
+ * console.log(typedParams.id);   // "1"
+ * console.log(typedParams.name); // "Bulbasaur"
+ * ```
+ */
 export type TypedPathParams<TPathParams extends string> = 
   TPathParams extends `:${infer ParamName}:${infer RestParams}`
     ? { [K in ParamName]: string } & TypedPathParams<`:${RestParams}`>
@@ -5,40 +22,16 @@ export type TypedPathParams<TPathParams extends string> =
       ? { [K in ParamName]: string }
       : {};
 
-// // Test cases to ensure the type works correctly
-// const typedParams1: TypedPathParams<':id'> = { 
-//   id: '', 
-//   //foo: 'bar' // This should error
-// };
-// typedParams1.id
-
-// const typedParams2: TypedPathParams<':id:name'> = {
-//   id: '',
-//   name: ''
-// };
-// typedParams2.id
-// typedParams2.name
-
-// const typedParams3: TypedPathParams<':id:name:age'> = {
-//   id: '',
-//   name: '',
-//   age: ''
-// };
-// typedParams3.id
-// typedParams3.name
-// typedParams3.age
-
-// Extract path parameters from a path string like "DELETE /pokemon/:id" -> ":id"
-export type ExtractPathParamsFromPath<TPath extends string> = 
-  TPath extends `${string} ${infer PathPart}`
-    ? ExtractPathParamsFromPathSegments<PathPart>
+export type ExtractTypedParamsFromMethodFirstPath<TPath extends string> = 
+  TPath extends `${string} ${infer PathPart}` // "METHOD /path"
+    ? ExtractTypeParamsFromMethodFirstPathSegments<PathPart>
     : never;
 
-type ExtractPathParamsFromPathSegments<TPath extends string> = 
-  TPath extends `/${infer Segment}/${infer Rest}`
+type ExtractTypeParamsFromMethodFirstPathSegments<TPath extends string> = 
+  TPath extends `/${infer Segment}/${infer Rest}` // "/segment/rest"
     ? Segment extends `:${infer ParamName}`
-      ? `:${ParamName}${ExtractPathParamsFromPathSegments<`/${Rest}`> extends `:${infer RestParams}` ? `:${RestParams}` : ""}`
-      : ExtractPathParamsFromPathSegments<`/${Rest}`>
+      ? `:${ParamName}${ExtractTypeParamsFromMethodFirstPathSegments<`/${Rest}`> extends `:${infer RestParams}` ? `:${RestParams}` : ""}`
+      : ExtractTypeParamsFromMethodFirstPathSegments<`/${Rest}`>
     : TPath extends `/${infer Segment}`
       ? Segment extends `:${infer ParamName}`
         ? `:${ParamName}`
