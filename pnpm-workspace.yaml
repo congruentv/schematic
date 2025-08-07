@@ -1,6 +1,7 @@
 packages:
   - packages/**
   - examples/**
+  - test-bracket-notation
 
 catalog:
   '@types/body-parser': 1.19.6

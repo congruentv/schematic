@@ -1,0 +1,13 @@
+{
+  "name": "bracket-notation-test",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@congruentv/schematic": "workspace:*",
+    "@congruentv/schematic-adapter-fetch": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "typescript": "catalog:"
+  }
+}

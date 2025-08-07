@@ -14,6 +14,14 @@ const client = createClient(pokemonApiContract, {
   }),
 });
 
+client.greet
+
+client.greetx
+
+client['greet']
+
+client['greetx']
+
 function App() {
   const [count, setCount] = useState(0);
   const [pokemonName, setPokemonName] = useState('');
