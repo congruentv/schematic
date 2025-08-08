@@ -1,25 +1,17 @@
-import { Express } from 'express';
-import { 
-  HttpMethodEndpointHandler,
-  MethodEndpointHandlerRegistryEntry, 
-  IHttpMethodEndpointDefinition,
-  type LowerCasedHttpMethod,
-  ValidateHttpMethodEndpointDefinition,
-  route,
-  MethodFirstPath,
-  ExtractEndpointFromPath,
-  ExtractTypedParamsFromMethodFirstPath,
-  ApiHandlersRegistry,
-  IApiContractDefinition,
-  ValidateApiContractDefinition
-} from '@congruentv/schematic';
+import { IApiContractDefinition, ValidateApiContractDefinition } from "./api_contract.js";
+import { ApiHandlersRegistry, MethodEndpointHandlerRegistryEntry } from "./api_handlers_registry.js";
+import { ExtractEndpointFromPath, MethodFirstPath, route } from "./api_routing.js";
+import { IHttpMethodEndpointDefinition, ValidateHttpMethodEndpointDefinition } from "./http_method_endpoint.js";
+import { HttpMethodEndpointHandler } from "./http_method_endpoint_handler.js";
+// import { LowerCasedHttpMethod } from "./http_method_type.js";
+import { ExtractTypedParamsFromMethodFirstPath } from "./typed_path_params.js";
+
 
 // Overload for registerMethodPathHandler
 export function register<
   const TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
   const TPath extends MethodFirstPath<TApiDef>
 >(
-  app: Express, 
   apiReg: ApiHandlersRegistry<TApiDef, "">,
   path: TPath,
   handler: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, ExtractTypedParamsFromMethodFirstPath<TPath>>
@@ -30,7 +22,6 @@ export function register<
   const TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
   TPathParams extends string
 >(
-  app: Express, 
   endpointEntry: MethodEndpointHandlerRegistryEntry<TDef, TPathParams>,
   handler: HttpMethodEndpointHandler<TDef, TPathParams>
 ): void;
@@ -42,21 +33,18 @@ export function register<
   const TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
   TPathParams extends string
 >(
-  app: Express,
   apiRegOrEndpoint: ApiHandlersRegistry<TApiDef, ""> | MethodEndpointHandlerRegistryEntry<TDef, TPathParams>,
   pathOrHandler: TPath | HttpMethodEndpointHandler<TDef, TPathParams>,
   handler?: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, ExtractTypedParamsFromMethodFirstPath<TPath>>
 ): void {
-  if (arguments.length === 4 && handler !== undefined) {
+  if (arguments.length === 3 && handler !== undefined) {
     registerMethodPathHandler(
-      app,
       apiRegOrEndpoint as ApiHandlersRegistry<TApiDef, "">,
       pathOrHandler as TPath,
       handler
     );
-  } else if (arguments.length === 3) {
+  } else if (arguments.length === 2) {
     registerEntryHandler(
-      app,
       apiRegOrEndpoint as MethodEndpointHandlerRegistryEntry<TDef, TPathParams>,
       pathOrHandler as HttpMethodEndpointHandler<TDef, TPathParams>
     );
@@ -69,38 +57,36 @@ export function registerMethodPathHandler<
   const TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
   const TPath extends MethodFirstPath<TApiDef>
 >(
-  app: Express, 
   apiReg: ApiHandlersRegistry<TApiDef, "">,
   path: TPath,
   handler: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, ExtractTypedParamsFromMethodFirstPath<TPath>>
 ) {
   const endpointEntry = route(apiReg, path);
-  return registerEntryHandler(app, endpointEntry, handler);
+  return registerEntryHandler(endpointEntry, handler);
 }
 
 export function registerEntryHandler<
   const TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
   TPathParams extends string
 >(
-  app: Express, 
   endpointEntry: MethodEndpointHandlerRegistryEntry<TDef, TPathParams>,
   handler: HttpMethodEndpointHandler<TDef, TPathParams>
 ) {
   endpointEntry._registerHandler(handler);
-  const { genericPath } = endpointEntry.methodEndpoint;
-  const method = endpointEntry.methodEndpoint.method.toLowerCase() as LowerCasedHttpMethod;
-  app[method](genericPath, async (req, res) => {
-    const pathParams = req.params;
-    const query = req.query;
-    const body = req.body;
-    const headers = JSON.parse(JSON.stringify(req.headers)); // TODO
-    const result = await endpointEntry.trigger({
-      headers,
-      pathParams,
-      query,
-      body,
-    });
-    res.status(result.code).json(result.body);
-  });
+  // const { genericPath } = endpointEntry.methodEndpoint;
+  // const method = endpointEntry.methodEndpoint.method.toLowerCase() as LowerCasedHttpMethod;
+  // app[method](genericPath, async (req, res) => {
+  //   const pathParams = req.params;
+  //   const query = req.query;
+  //   const body = req.body;
+  //   const headers = JSON.parse(JSON.stringify(req.headers)); // TODO
+  //   const result = await endpointEntry.trigger({
+  //     headers,
+  //     pathParams,
+  //     query,
+  //     body,
+  //   });
+  //   res.status(result.code).json(result.body);
+  // });
 }
   

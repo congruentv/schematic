@@ -6,10 +6,22 @@ import { HttpStatusCode } from "./http_status_code.js";
 export function createRegistry<
   TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>
 >(
-  contract: ApiContract<TDef>
+  contract: ApiContract<TDef>,
+  callback: GenericOnHandlerRegisteredCallback
 ) {
-  return new ApiHandlersRegistry<TDef>(contract);
+  return new ApiHandlersRegistry<TDef>(contract, callback);
 }
+
+export type OnHandlerRegisteredCallback<
+  TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
+  TPathParams extends string
+> = (entry: MethodEndpointHandlerRegistryEntry<TDef, TPathParams>) => void;
+
+export type GenericOnHandlerRegisteredCallback = 
+  OnHandlerRegisteredCallback<
+    IHttpMethodEndpointDefinition 
+    & ValidateHttpMethodEndpointDefinition<IHttpMethodEndpointDefinition>, string
+  >;
 
 export class MethodEndpointHandlerRegistryEntry<
   TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
@@ -25,8 +37,16 @@ export class MethodEndpointHandlerRegistryEntry<
   }
 
   private _handler: HttpMethodEndpointHandler<TDef, TPathParams> | null = null;
-  handle(handler: HttpMethodEndpointHandler<TDef, TPathParams>): void {
+  _registerHandler(handler: HttpMethodEndpointHandler<TDef, TPathParams>): void {
     this._handler = handler;
+    if (this._onHandlerRegisteredCallback) {
+      this._onHandlerRegisteredCallback(this);
+    }
+  }
+
+  private _onHandlerRegisteredCallback: OnHandlerRegisteredCallback<TDef, TPathParams> | null = null;
+  _onHandlerRegistered(callback: OnHandlerRegisteredCallback<TDef, TPathParams>): void {
+    this._onHandlerRegisteredCallback = callback;
   }
 
   async trigger(data: { 
@@ -101,7 +121,10 @@ export class MethodEndpointHandlerRegistryEntry<
 }
 
 class InnerApiHandlersRegistry<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>> {
-  constructor(contract: ApiContract<TDef>) {
+  constructor(
+    contract: ApiContract<TDef>, 
+    callback: GenericOnHandlerRegisteredCallback
+  ) {
     const clonedDefinition = contract._cloneDefinition();
 
     const proto = { ...InnerApiHandlersRegistry.prototype };
@@ -109,18 +132,21 @@ class InnerApiHandlersRegistry<TDef extends IApiContractDefinition & ValidateApi
     Object.setPrototypeOf(this, proto);
     Object.assign(this, clonedDefinition);
 
-    InnerApiHandlersRegistry._implement(this);
+    InnerApiHandlersRegistry._implement(this, callback);
   }
 
   private static _implement(
-    currObj: any
+    currObj: any,
+    callback: GenericOnHandlerRegisteredCallback
   ): void {
     for (const key of Object.keys(currObj)) {
       const value = currObj[key];
       if (value instanceof HttpMethodEndpoint) {
-        currObj[key] = new MethodEndpointHandlerRegistryEntry(value);
+        const entry = new MethodEndpointHandlerRegistryEntry(value);
+        entry._onHandlerRegistered(callback);
+        currObj[key] = entry;
       } else if (typeof value === "object" && value !== null) {
-        InnerApiHandlersRegistry._implement(value);
+        InnerApiHandlersRegistry._implement(value, callback);
       }
     }
   }
@@ -151,4 +177,7 @@ export type ApiHandlersRegistry<
 export const ApiHandlersRegistry: new <
   TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>, 
   TPathParams extends string = ""
->(contract: ApiContract<TDef>) => ApiHandlersRegistry<TDef, TPathParams> = InnerApiHandlersRegistry as any;
+>(
+  contract: ApiContract<TDef>, 
+  callback: GenericOnHandlerRegisteredCallback
+) => ApiHandlersRegistry<TDef, TPathParams> = InnerApiHandlersRegistry as any;
