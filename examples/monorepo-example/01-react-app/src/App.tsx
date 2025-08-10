@@ -3,15 +3,18 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import { HttpStatusCode } from '@congruentv/schematic';
-import { createClient } from '@congruentv/schematic-adapter-fetch';
+import { createFetchClient } from '@congruentv/schematic-adapter-fetch';
 import { pokemonApiContract } from '@monorepo-example/contract';
 
-const client = createClient(pokemonApiContract, {
+const client = createFetchClient(pokemonApiContract, {
   baseUrl: 'http://localhost:3000',
-  headers: () => ({
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer ' + (localStorage.getItem('token') ?? 'dummy-token'),
-  }),
+  enhanceRequestInit: (reqInit) => {
+    reqInit.headers = {
+      'Authorization': 'Bearer ' + (localStorage.getItem('token') ?? 'dummy-token'),
+      ...reqInit.headers,
+    };
+    return reqInit;
+  },
 });
 
 function App() {

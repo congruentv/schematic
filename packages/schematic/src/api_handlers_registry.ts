@@ -93,7 +93,7 @@ export class MethodEndpointHandlerRegistryEntry<
         || data.body === null
         || data.body === undefined
       ) {
-        throw new Error('Body is required for this endpoint');
+        throw new Error(`Body is required for this endpoint, { 'Content-Type': 'application/json' } header might be missing`);
       }
       const result = this._methodEndpoint.definition.body.safeParse(data.body);
       if (!result.success) {

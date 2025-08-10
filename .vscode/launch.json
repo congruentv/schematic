@@ -9,6 +9,15 @@
       "restart": true,
       "skipFiles": ["<node_internals>/**"],
       "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "examples/monorepo/node-client attach debug",
+      "type": "node",
+      "request": "attach",
+      "port": 9999,
+      "restart": true,
+      "skipFiles": ["<node_internals>/**"],
+      "cwd": "${workspaceFolder}"
     }
   ]
 }
