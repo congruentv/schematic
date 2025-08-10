@@ -3,6 +3,16 @@ import { HttpMethodCallFunc,  } from './api_client_http_method_call.js';
 import { HttpMethodEndpoint } from './http_method_endpoint.js';
 import { ClientHttpMethodEndpointHandler } from "./http_method_endpoint_handler.js";
 
+export function createClient<
+  TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>
+> (
+  contract: ApiContract<TDef>, 
+  clientGenericHandler: ClientHttpMethodEndpointHandler
+) {
+  const apiClient = new ApiClient(contract, clientGenericHandler);
+  return apiClient;
+}
+
 export type PathParamFunc<TDef> = (value: string | number) => TDef;
 
 export interface IClientContext {
@@ -129,21 +139,15 @@ class InnerApiClient<TDef extends IApiContractDefinition & ValidateApiContractDe
 }
 
 export type ApiClientDef<ObjType extends object> = {
-  // 1) rename `":foo"` → `"foo"`
   [Key in keyof ObjType as Key extends `:${infer Param}` ? Param : Key]:
-    // 2) if it *was* a path‐param key…
     Key extends `:${string}`
-      // …and the value really is an object, recurse into it…
       ? ObjType[Key] extends object
         ? PathParamFunc<ApiClientDef<ObjType[Key]>>
         : never
-      // 3) else if it’s a MethodEndpoint<Def>, pull out Def…
       : ObjType[Key] extends HttpMethodEndpoint<infer TMethodEndpointDef>
         ? HttpMethodCallFunc<TMethodEndpointDef>
-        // 4) else if it’s another nested object, recurse…
         : ObjType[Key] extends object
           ? ApiClientDef<ObjType[Key]>
-          // 5) otherwise just leave it alone
           : ObjType[Key];
 };
 

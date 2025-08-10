@@ -1,13 +1,21 @@
 import { HttpStatusCode } from '@congruentv/schematic';
-import { createClient } from '@congruentv/schematic-adapter-fetch';
+import { createFetchClient } from '@congruentv/schematic-adapter-fetch';
 import { pokemonApiContract } from '@monorepo-example/contract';
 
-const client = createClient(pokemonApiContract, {
-  baseUrl: 'http://localhost:3000',
-  headers: () => ({
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer dummy-node-token',
-  }),
+// console.log('Waiting 10 secs...');
+// await new Promise(resolve => setTimeout(resolve, 10000)); // wait for the contract to be ready
+// console.log('Ready');
+
+const client = createFetchClient(pokemonApiContract, {
+  baseUrl: () => 'http://localhost:3000',
+  enhanceRequestInit: (reqInit, _input) => {
+    reqInit.headers = {
+      // 'Content-Type': 'application/json', // already set during the request initialization
+      'Authorization': 'Bearer dummy-node-token',
+      ...reqInit.headers, // reqInit.headers might already contain some header values set during the request initialization
+    };
+    return reqInit;
+  }
 });
 
 console.log('Greeting...');
