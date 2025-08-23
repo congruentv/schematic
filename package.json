@@ -1,6 +1,6 @@
 {
   "name": "@congruentv/schematic-monorepo",
-  "version": "0.6.0",
+  "version": "0.0.0",
   "description": "Typescript schema-first tooling for modern typed REST APIs and Ops.",
   "keywords": [],
   "author": "congruentv",
@@ -8,5 +8,8 @@
   "packageManager": "pnpm@10.13.1",
   "devDependencies": {
     "@changesets/cli": "^2.29.5"
+  }, 
+  "scripts": {
+    "pkgs:version:bump": "pnpm --filter \"./packages/**\" exec pnpm version"
   }
 }

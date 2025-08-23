@@ -1,6 +1,9 @@
 # schematic
 Typescript schema-first tooling for modern typed REST APIs and Ops.
 
+### Version bump script
+- pnpm pkgs:version:bump -- [patch/minor/major/x.y.z]
+
 ### Alternatives
 - https://github.com/trpc/trpc
 - https://github.com/unnoq/orpc
