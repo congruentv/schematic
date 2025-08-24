@@ -4,8 +4,6 @@ import { HttpMethodEndpoint } from "./http_method_endpoint.js";
 import { HttpMethod } from "./http_method_type.js";
 import { ExtractTypedParamsFromMethodFirstPath } from "./typed_path_params.js";
 
-// TODO: partialRoute -> express.Router
-
 export function route<
   TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
   const TPath extends MethodFirstPath<TApiDef>

@@ -41,7 +41,7 @@ export function createExpressRegistry<
   return registry;
 }
 
-export function expressPrehandler<
+export function expressPreHandler<
   TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
   TPathParams extends string
 > (

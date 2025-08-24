@@ -2,8 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 
-import { HttpStatusCode, route, register } from '@congruentv/schematic';
-import { createExpressRegistry, expressPrehandler } from '@congruentv/schematic-adapter-express';
+import { HttpStatusCode, route, register, partialPathString } from '@congruentv/schematic';
+import { createExpressRegistry, expressPreHandler } from '@congruentv/schematic-adapter-express';
 
 import { 
   pokemonApiContract, 
@@ -13,6 +13,8 @@ import {
 // console.log('Waiting 10 secs...');
 // await new Promise(resolve => setTimeout(resolve, 10000)); // wait
 // console.log('Ready');
+
+//const expressRouter = express.Router();
 
 const app = express();
 app.use(cors());
@@ -29,6 +31,13 @@ const pokemons: Pokemon[] = [
 
 const api = createExpressRegistry(app, pokemonApiContract);
 
+const greet_name_path_string = partialPathString(api, '/greet/:name');
+app.use(greet_name_path_string, (req, _res, next) => {
+  console.log('(x) Middleware for /greet/:name', req.params.name);
+  next();
+  console.log('(y) Middleware for /greet/:name', req.params.name);
+});
+
 register(api, 'GET /greet/:name', async (req) => {
   const name = req.pathParams.name;
   return {
@@ -37,16 +46,16 @@ register(api, 'GET /greet/:name', async (req) => {
   };
 });
 
-route(api, 'GET /greet/:name/preferred/:salute')
+route(api, `GET /greet/:name/preferred/:salute`)
 //api.greet[':name'].preferred[':salute'].GET
   .prepare(({ methodEndpoint: { lowerCasedMethod, genericPath }}) => {
     app[lowerCasedMethod](genericPath, (req, _res, next) => {
-      console.log('endpoint hit', req.method, req.path);
+      console.log('(a) endpoint hit', req.method, req.path);
       next();
-      console.log('endpoint finished', req.method, req.path);
+      console.log('(b) endpoint finished', req.method, req.path);
     });
   })
-  .prepare(expressPrehandler(app, (req, res, next) => {
+  .prepare(expressPreHandler(app, (req, res, next) => {
     console.log('(1) cookies for', req.method, req.path, ' ====> ', req.cookies);
     next();
     console.log('(2) status code for', req.method, req.path, ' ====> ', res.statusCode);
