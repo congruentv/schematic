@@ -78,6 +78,8 @@ route(api, `GET /greet/:name/preferred/:salute`)
   });
 
 const greetNamePartialApi = partial(api, '/greet/:name');
+// @ts-ignore
+const _partial2 = partial(greetNamePartialApi, '/preferred');
 
 register(greetNamePartialApi, 'GET /preferred-salute/:salute', async (req) => {
   const name = req.pathParams.name;
@@ -109,6 +111,12 @@ register(api.pokemon[':id'].GET, async (req) => {
 });
 
 const pokemonPartialApi = partial(api, '/pokemon');
+
+app.use(partialPathString(pokemonPartialApi, ''), (_req, _res, next) => {
+  console.log('(XX) Middleware for /pokemon');
+  next();
+  console.log('(YY) Middleware for /pokemon');
+});
 
 register(pokemonPartialApi, 'PATCH /:id', async (req) => {
   const pokemon = pokemons.find(p => p.id.toString() === req.pathParams.id);

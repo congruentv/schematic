@@ -5,9 +5,10 @@ import { ExtractTypeParamsFromPathSegments } from "./typed_path_params.js";
 
 export function partialPathString<
   TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
+  TPathParams extends string,
   const TPath extends PartialPath<TApiDef>
 >(
-  _apiReg: ApiHandlersRegistry<TApiDef, "">,
+  _apiReg: ApiHandlersRegistry<TApiDef, TPathParams>,
   path: TPath
 ): string {
   return path as string;
@@ -15,9 +16,10 @@ export function partialPathString<
 
 export function partial<
   TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
+  TPathParams extends string,
   const TPath extends PartialPath<TApiDef>
 >(
-  apiReg: ApiHandlersRegistry<TApiDef, "">,
+  apiReg: ApiHandlersRegistry<TApiDef, TPathParams>,
   path: TPath
 ): PartialPathResult<TApiDef, TPath> extends infer TPartialApi
   ? TPartialApi extends IApiContractDefinition & ValidateApiContractDefinition<TPartialApi>
@@ -40,14 +42,16 @@ export function partial<
   return current as any;
 }
 
-export type PartialPath<TDef, BasePath extends string = ""> = {
-  [K in keyof TDef & string]:
-    TDef[K] extends HttpMethodEndpoint<infer _TEndpointDef>
-      ? never
-      : TDef[K] extends object
-        ? `${BasePath}/${K}` | PartialPath<TDef[K], `${BasePath}/${K}`>
-        : never
-}[keyof TDef & string];
+export type PartialPath<TDef, BasePath extends string = ""> =
+  | (BasePath extends "" ? "" : never)
+  | {
+      [K in keyof TDef & string]:
+        TDef[K] extends HttpMethodEndpoint<infer _TEndpointDef>
+          ? never
+          : TDef[K] extends object
+            ? `${BasePath}/${K}` | PartialPath<TDef[K], `${BasePath}/${K}`>
+            : never
+    }[keyof TDef & string];
 
 export type PartialPathResult<
   TApiDef extends IApiContractDefinition,
