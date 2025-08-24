@@ -30,8 +30,32 @@ export type ExtractTypedParamsFromMethodFirstPath<TPath extends string> =
 type ExtractTypeParamsFromMethodFirstPathSegments<TPath extends string> = 
   TPath extends `/${infer Segment}/${infer Rest}` // "/segment/rest"
     ? Segment extends `:${infer ParamName}`
-      ? `:${ParamName}${ExtractTypeParamsFromMethodFirstPathSegments<`/${Rest}`> extends `:${infer RestParams}` ? `:${RestParams}` : ""}`
+      ? CombinePathParams<`:${ParamName}`, ExtractTypeParamsFromMethodFirstPathSegments<`/${Rest}`>>
       : ExtractTypeParamsFromMethodFirstPathSegments<`/${Rest}`>
+    : TPath extends `/${infer Segment}`
+      ? Segment extends `:${infer ParamName}`
+        ? `:${ParamName}`
+        : ""
+    : "";
+
+export type CombinePathParams<T1 extends string, T2 extends string> = 
+  T1 extends ""
+    ? T2
+    : T2 extends ""
+      ? T1
+      : T1 extends `:${infer Rest1}`
+        ? T2 extends `:${infer Rest2}`
+          ? `:${Rest1}:${Rest2}`
+          : `${T1}${T2}`
+        : T2 extends `:${infer Rest2}`
+          ? `${T1}:${Rest2}`
+          : `${T1}${T2}`;
+
+export type ExtractPathParamsFromPartialPath<TPath extends string> = 
+  TPath extends `/${infer Segment}/${infer Rest}` 
+    ? Segment extends `:${infer ParamName}`
+      ? CombinePathParams<`:${ParamName}`, ExtractPathParamsFromPartialPath<`/${Rest}`>>
+      : ExtractPathParamsFromPartialPath<`/${Rest}`>
     : TPath extends `/${infer Segment}`
       ? Segment extends `:${infer ParamName}`
         ? `:${ParamName}`
