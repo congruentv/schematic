@@ -3,7 +3,6 @@ import { ApiHandlersRegistry, MethodEndpointHandlerRegistryEntry } from "./api_h
 import { ExtractEndpointFromPath, MethodFirstPath, route } from "./api_routing.js";
 import { IHttpMethodEndpointDefinition, ValidateHttpMethodEndpointDefinition } from "./http_method_endpoint.js";
 import { HttpMethodEndpointHandler } from "./http_method_endpoint_handler.js";
-// import { LowerCasedHttpMethod } from "./http_method_type.js";
 import { ExtractTypedParamsFromMethodFirstPath } from "./typed_path_params.js";
 
 
@@ -15,6 +14,17 @@ export function register<
   apiReg: ApiHandlersRegistry<TApiDef, "">,
   path: TPath,
   handler: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, ExtractTypedParamsFromMethodFirstPath<TPath>>
+): void;
+
+// Overload for registerMethodPathHandler with partial api definition
+export function register<
+  const TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
+  TPathParams extends string,
+  const TPath extends MethodFirstPath<TApiDef>
+>(
+  apiReg: ApiHandlersRegistry<TApiDef, TPathParams>,
+  path: TPath,
+  handler: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, `${TPathParams}${ExtractTypedParamsFromMethodFirstPath<TPath>}`>
 ): void;
 
 // Overload for registerEntryHandler

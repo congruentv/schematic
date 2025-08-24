@@ -1,6 +1,7 @@
 import { IApiContractDefinition, ValidateApiContractDefinition } from "./api_contract.js";
-import { ApiHandlersRegistry } from "./api_handlers_registry.js";
+import { ApiHandlersRegistry, MethodEndpointHandlerRegistryEntry } from "./api_handlers_registry.js";
 import { HttpMethodEndpoint } from "./http_method_endpoint.js";
+import { ExtractTypeParamsFromPathSegments } from "./typed_path_params.js";
 
 export function partialPathString<
   TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
@@ -12,14 +13,31 @@ export function partialPathString<
   return path as string;
 }
 
-export function partialPath<
+export function partial<
   TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
   const TPath extends PartialPath<TApiDef>
 >(
-  _apiReg: ApiHandlersRegistry<TApiDef, "">,
+  apiReg: ApiHandlersRegistry<TApiDef, "">,
   path: TPath
-): PartialPathResult<TApiDef, TPath> {
-  return path as PartialPathResult<TApiDef, TPath>;
+): PartialPathResult<TApiDef, TPath> extends infer TPartialApi
+  ? TPartialApi extends IApiContractDefinition & ValidateApiContractDefinition<TPartialApi>
+    ? ApiHandlersRegistry<TPartialApi, ExtractTypeParamsFromPathSegments<TPath>>
+    : never
+  : never {
+  const pathSegments = (path as string).split('/').filter((segment: string) => segment.length > 0);
+  let current: any = apiReg;
+  
+  for (const segment of pathSegments) {
+    if (current[segment] instanceof MethodEndpointHandlerRegistryEntry) {
+      throw new Error(`Path "${path}" is not partial`);
+    } else if (typeof current[segment] === 'object') {
+      current = current[segment];
+    } else {
+      throw new Error(`Path segment "${segment}" not found in API handlers registry`);
+    }
+  }
+  
+  return current as any;
 }
 
 export type PartialPath<TDef, BasePath extends string = ""> = {
@@ -41,8 +59,8 @@ export type PartialPathResult<
 type SplitPath<TPath extends string> = TPath extends `${infer First}/${infer Rest}`
   ? [First, ...SplitPath<Rest>]
   : TPath extends ""
-  ? []
-  : [TPath];
+    ? []
+    : [TPath];
 
 type NavigateToPartialPath<TDef, TSegments extends readonly string[]> = TSegments extends readonly [
   infer First extends string,

@@ -24,14 +24,14 @@ export type TypedPathParams<TPathParams extends string> =
 
 export type ExtractTypedParamsFromMethodFirstPath<TPath extends string> = 
   TPath extends `${string} ${infer PathPart}` // "METHOD /path"
-    ? ExtractTypeParamsFromMethodFirstPathSegments<PathPart>
+    ? ExtractTypeParamsFromPathSegments<PathPart>
     : never;
 
-type ExtractTypeParamsFromMethodFirstPathSegments<TPath extends string> = 
+export type ExtractTypeParamsFromPathSegments<TPath extends string> = 
   TPath extends `/${infer Segment}/${infer Rest}` // "/segment/rest"
     ? Segment extends `:${infer ParamName}`
-      ? `:${ParamName}${ExtractTypeParamsFromMethodFirstPathSegments<`/${Rest}`> extends `:${infer RestParams}` ? `:${RestParams}` : ""}`
-      : ExtractTypeParamsFromMethodFirstPathSegments<`/${Rest}`>
+      ? `:${ParamName}${ExtractTypeParamsFromPathSegments<`/${Rest}`> extends `:${infer RestParams}` ? `:${RestParams}` : ""}`
+      : ExtractTypeParamsFromPathSegments<`/${Rest}`>
     : TPath extends `/${infer Segment}`
       ? Segment extends `:${infer ParamName}`
         ? `:${ParamName}`

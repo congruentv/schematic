@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 
-import { HttpStatusCode, route, register, partialPathString } from '@congruentv/schematic';
+import { HttpStatusCode, route, register, partialPathString, PartialPath, MethodFirstPath, partial } from '@congruentv/schematic';
 import { createExpressRegistry, expressPreHandler } from '@congruentv/schematic-adapter-express';
 
 import { 
@@ -31,8 +31,15 @@ const pokemons: Pokemon[] = [
 
 const api = createExpressRegistry(app, pokemonApiContract);
 
-const greet_name_path_string = partialPathString(api, '/greet/:name');
-app.use(greet_name_path_string, (req, _res, next) => {
+type ContractDef = typeof pokemonApiContract.__DEF__;
+
+const mfp: MethodFirstPath<ContractDef> = 'GET /greet/:name/preferred-salute/:salute';
+console.log('mfp', mfp, mfp.length);
+
+const pp: PartialPath<ContractDef> = '/greet/:name/preferred-salute';
+console.log('pp     ', pp, pp.length);
+
+app.use(partialPathString(api, '/greet/:name'), (req, _res, next) => {
   console.log('(x) Middleware for /greet/:name', req.params.name);
   next();
   console.log('(y) Middleware for /greet/:name', req.params.name);
@@ -70,7 +77,9 @@ route(api, `GET /greet/:name/preferred/:salute`)
     };
   });
 
-register(api, 'GET /greet/:name/preferred-salute/:salute', async (req) => {
+const greetNamePartialApi = partial(api, '/greet/:name');
+
+register(greetNamePartialApi, 'GET /preferred-salute/:salute', async (req) => {
   const name = req.pathParams.name;
   const salute = req.pathParams.salute;
   return {
@@ -99,7 +108,9 @@ register(api.pokemon[':id'].GET, async (req) => {
   return { code: HttpStatusCode.OK_200, body: pokemon };
 });
 
-register(api, 'PATCH /pokemon/:id', async (req) => {
+const pokemonPartialApi = partial(api, '/pokemon');
+
+register(pokemonPartialApi, 'PATCH /:id', async (req) => {
   const pokemon = pokemons.find(p => p.id.toString() === req.pathParams.id);
   if (!pokemon) {
     return { code: HttpStatusCode.NotFound_404, body: { userMessage: `Pokemon with ID ${req.pathParams.id} not found` } };
@@ -108,7 +119,7 @@ register(api, 'PATCH /pokemon/:id', async (req) => {
   return { code: HttpStatusCode.NoContent_204 };
 });
 
-register(api, 'POST /pokemon', async (req) => {
+register(pokemonPartialApi, 'POST ', async (req) => {
   console.log('Headers:', req.headers);
   const newPokemon = {
     id: pokemons.length + 1,
@@ -121,7 +132,7 @@ register(api, 'POST /pokemon', async (req) => {
   };
 });
 
-register(route(api, 'DELETE /pokemon/:id'), async (req) => {
+register(route(pokemonPartialApi, 'DELETE /:id'), async (req) => {
   const pokemon = pokemons.find(p => p.id.toString() === req.pathParams.id);
   if (!pokemon) {
     return { code: HttpStatusCode.NotFound_404, body: { userMessage: `Pokemon with ID ${req.pathParams.id} not found` } };
