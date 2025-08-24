@@ -10,6 +10,24 @@ export function route<
 >(
   apiReg: ApiHandlersRegistry<TApiDef, "">,
   path: TPath
+): MethodEndpointHandlerRegistryEntry<ExtractEndpointFromPath<TApiDef, TPath>, ExtractTypedParamsFromMethodFirstPath<TPath>>;
+
+export function route<
+  TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
+  TPathParams extends string,
+  const TPath extends MethodFirstPath<TApiDef>
+>(
+  apiReg: ApiHandlersRegistry<TApiDef, TPathParams>,
+  path: TPath
+): MethodEndpointHandlerRegistryEntry<ExtractEndpointFromPath<TApiDef, TPath>, `${TPathParams}${ExtractTypedParamsFromMethodFirstPath<TPath>}`>;
+
+export function route<
+  TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
+  TPathParams extends string,
+  const TPath extends MethodFirstPath<TApiDef>
+>(
+  apiReg: ApiHandlersRegistry<TApiDef, TPathParams>,
+  path: TPath
 ): MethodEndpointHandlerRegistryEntry<ExtractEndpointFromPath<TApiDef, TPath>, ExtractTypedParamsFromMethodFirstPath<TPath>> {
   const pathStr = path as string;
   const spaceIndex = pathStr.indexOf(' ');

@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 
-import { HttpStatusCode, route, register, partialPathString } from '@congruentv/schematic';
+import { HttpStatusCode, route, register, partialPathString, partialPath } from '@congruentv/schematic';
 import { createExpressRegistry, expressPreHandler } from '@congruentv/schematic-adapter-express';
 
 import { 
@@ -31,8 +31,7 @@ const pokemons: Pokemon[] = [
 
 const api = createExpressRegistry(app, pokemonApiContract);
 
-const greet_name_path_string = partialPathString(api, '/greet/:name');
-app.use(greet_name_path_string, (req, _res, next) => {
+app.use(partialPathString(api, '/greet/:name'), (req, _res, next) => {
   console.log('(x) Middleware for /greet/:name', req.params.name);
   next();
   console.log('(y) Middleware for /greet/:name', req.params.name);
@@ -70,14 +69,21 @@ route(api, `GET /greet/:name/preferred/:salute`)
     };
   });
 
-register(api, 'GET /greet/:name/preferred-salute/:salute', async (req) => {
-  const name = req.pathParams.name;
-  const salute = req.pathParams.salute;
-  return {
-    code: HttpStatusCode.OK_200,
-    body: `${salute}, ${name}!`,
-  };
-});
+const greetNamePartial = partialPath(api, '/greet/:name');
+
+route(greetNamePartial, 'GET /preferred-salute/:salute')
+// greetNamePartial['preferred-salute'][':salute'].GET
+  
+  //.prepare(...) // TODO: middleware example
+  
+  .register(async (req) => {
+    const name = req.pathParams.name;
+    const salute = req.pathParams.salute;
+    return {
+      code: HttpStatusCode.OK_200,
+      body: `${salute}, ${name}!`,
+    };
+  });
 
 register(api.pokemon.GET, async (req) => {
   req.pathParams

@@ -18,11 +18,26 @@ export function partialPath<
 >(
   _apiReg: ApiHandlersRegistry<TApiDef, "">,
   path: TPath
-): PartialPathResult<TApiDef, TPath> {
-  return path as PartialPathResult<TApiDef, TPath>;
+): PartialPathResult<TApiDef, TPath> extends infer TPartialApi
+  ? TPartialApi extends IApiContractDefinition & ValidateApiContractDefinition<TPartialApi>
+    ? ApiHandlersRegistry<TPartialApi, ExtractPathParamsFromPath<TPath>>
+    : never
+  : never {
+  return path as any;
 }
 
-export type PartialPath<TDef, BasePath extends string = ""> = {
+type ExtractPathParamsFromPath<TPath extends string> = 
+  TPath extends `/${infer Segment}/${infer Rest}` 
+    ? Segment extends `:${infer ParamName}`
+      ? `:${ParamName}${ExtractPathParamsFromPath<`/${Rest}`> extends `:${infer RestParams}` ? `:${RestParams}` : ""}`
+      : ExtractPathParamsFromPath<`/${Rest}`>
+    : TPath extends `/${infer Segment}`
+      ? Segment extends `:${infer ParamName}`
+        ? `:${ParamName}`
+        : ""
+    : "";
+
+type PartialPath<TDef, BasePath extends string = ""> = {
   [K in keyof TDef & string]:
     TDef[K] extends HttpMethodEndpoint<infer _TEndpointDef>
       ? never
@@ -41,8 +56,8 @@ export type PartialPathResult<
 type SplitPath<TPath extends string> = TPath extends `${infer First}/${infer Rest}`
   ? [First, ...SplitPath<Rest>]
   : TPath extends ""
-  ? []
-  : [TPath];
+    ? []
+    : [TPath];
 
 type NavigateToPartialPath<TDef, TSegments extends readonly string[]> = TSegments extends readonly [
   infer First extends string,
