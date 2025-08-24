@@ -10,6 +10,7 @@ Typescript schema-first tooling for modern typed REST APIs and Ops.
 - https://github.com/ts-rest/ts-rest
 - https://github.com/ecyrbe/zodios
 - https://github.com/aspida/aspida
+- https://github.com/RobinTail/express-zod-api
 
 ### Make sure that
 - tsconfig.json#compilerOptions.strict is set to true

@@ -4,6 +4,8 @@ import { HttpMethodEndpoint } from "./http_method_endpoint.js";
 import { HttpMethod } from "./http_method_type.js";
 import { ExtractTypedParamsFromMethodFirstPath } from "./typed_path_params.js";
 
+// TODO: partialRoute -> express.Router
+
 export function route<
   TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
   const TPath extends MethodFirstPath<TApiDef>
@@ -14,7 +16,7 @@ export function route<
   const pathStr = path as string;
   const spaceIndex = pathStr.indexOf(' ');
   if (spaceIndex === -1) {
-    throw new Error(`Invalid path format: ${pathStr}. Expected format: "METHOD /path"`);
+    throw new Error(`Invalid path format: ${pathStr}. Expected format: "HTTP_METHOD /path"`);
   }
   const method = pathStr.substring(0, spaceIndex) as HttpMethod;
   const urlPath = pathStr.substring(spaceIndex + 1);

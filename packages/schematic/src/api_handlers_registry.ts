@@ -12,6 +12,11 @@ export function createRegistry<
   return new ApiHandlersRegistry<TDef>(contract, callback);
 }
 
+export type PrepareRegistryEntryCallback<
+  TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
+  TPathParams extends string
+> = (entry: MethodEndpointHandlerRegistryEntry<TDef, TPathParams>) => void;
+
 export type OnHandlerRegisteredCallback<
   TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
   TPathParams extends string
@@ -37,7 +42,7 @@ export class MethodEndpointHandlerRegistryEntry<
   }
 
   private _handler: HttpMethodEndpointHandler<TDef, TPathParams> | null = null;
-  _registerHandler(handler: HttpMethodEndpointHandler<TDef, TPathParams>): void {
+  register(handler: HttpMethodEndpointHandler<TDef, TPathParams>): void {
     this._handler = handler;
     if (this._onHandlerRegisteredCallback) {
       this._onHandlerRegisteredCallback(this);
@@ -47,6 +52,11 @@ export class MethodEndpointHandlerRegistryEntry<
   private _onHandlerRegisteredCallback: OnHandlerRegisteredCallback<TDef, TPathParams> | null = null;
   _onHandlerRegistered(callback: OnHandlerRegisteredCallback<TDef, TPathParams>): void {
     this._onHandlerRegisteredCallback = callback;
+  }
+
+  prepare(callback: PrepareRegistryEntryCallback<TDef, TPathParams>) {
+    callback(this);
+    return this;
   }
 
   async trigger(data: { 

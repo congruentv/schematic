@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { HttpStatusCode } from './http_status_code.js';
-import { HttpMethod } from './http_method_type.js';
+import { HttpMethod, LowerCasedHttpMethod } from './http_method_type.js';
 import { HttpMethodEndpointResponse } from './http_method_endpoint_response.js';
 
 export function endpoint<TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>>(definition: TDef): HttpMethodEndpoint<TDef> {
@@ -50,6 +50,10 @@ export class HttpMethodEndpoint<const TDef extends IHttpMethodEndpointDefinition
   private _method: HttpMethod = null as any;
   get method(): HttpMethod {
     return this._method;
+  }
+
+  get lowerCasedMethod(): LowerCasedHttpMethod {
+    return this._method.toLowerCase() as LowerCasedHttpMethod;
   }
 
   constructor(definition: TDef) {

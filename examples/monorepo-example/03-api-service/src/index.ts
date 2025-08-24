@@ -3,7 +3,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 
 import { HttpStatusCode, route, register } from '@congruentv/schematic';
-import { createExpressRegistry } from '@congruentv/schematic-adapter-express';
+import { createExpressRegistry, expressPrehandler } from '@congruentv/schematic-adapter-express';
 
 import { 
   pokemonApiContract, 
@@ -11,7 +11,7 @@ import {
 } from '@monorepo-example/contract';
 
 // console.log('Waiting 10 secs...');
-// await new Promise(resolve => setTimeout(resolve, 10000)); // wait for the contract to be ready
+// await new Promise(resolve => setTimeout(resolve, 10000)); // wait
 // console.log('Ready');
 
 const app = express();
@@ -37,14 +37,29 @@ register(api, 'GET /greet/:name', async (req) => {
   };
 });
 
-register(api, 'GET /greet/:name/preferred/:salute', async (req) => {
-  const name = req.pathParams.name;
-  const salute = req.pathParams.salute;
-  return {
-    code: HttpStatusCode.OK_200,
-    body: `${salute}, ${name}!`,
-  };
-});
+route(api, 'GET /greet/:name/preferred/:salute')
+//api.greet[':name'].preferred[':salute'].GET
+  .prepare(({ methodEndpoint: { lowerCasedMethod, genericPath }}) => {
+    app[lowerCasedMethod](genericPath, (req, _res, next) => {
+      console.log('endpoint hit', req.method, req.path);
+      next();
+      console.log('endpoint finished', req.method, req.path);
+    });
+  })
+  .prepare(expressPrehandler(app, (req, res, next) => {
+    console.log('(1) cookies for', req.method, req.path, ' ====> ', req.cookies);
+    next();
+    console.log('(2) status code for', req.method, req.path, ' ====> ', res.statusCode);
+  }))
+  .register(async (req) => {
+    console.log('executing', req.method, req.genericPath);
+    const name = req.pathParams.name;
+    const salute = req.pathParams.salute;
+    return {
+      code: HttpStatusCode.OK_200,
+      body: `${salute}, ${name}!`,
+    };
+  });
 
 register(api, 'GET /greet/:name/preferred-salute/:salute', async (req) => {
   const name = req.pathParams.name;
