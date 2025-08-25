@@ -7,6 +7,8 @@ import { ExtractTypedParamsFromMethodFirstPath } from "./typed_path_params.js";
 
 
 // Overload for registerMethodPathHandler
+
+/* // TODO: clean up
 export function register<
   const TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
   const TPath extends MethodFirstPath<TApiDef>
@@ -17,6 +19,8 @@ export function register<
 ): void;
 
 // Overload for registerMethodPathHandler with partial api definition
+*/
+
 export function register<
   const TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
   TPathParams extends string,

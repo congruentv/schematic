@@ -4,6 +4,7 @@ import { HttpMethodEndpoint } from "./http_method_endpoint.js";
 import { HttpMethod } from "./http_method_type.js";
 import { ExtractTypedParamsFromMethodFirstPath } from "./typed_path_params.js";
 
+/* // TODO: clean up
 export function route<
   TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
   const TPath extends MethodFirstPath<TApiDef>
@@ -20,6 +21,7 @@ export function route<
   apiReg: ApiHandlersRegistry<TApiDef, TPathParams>,
   path: TPath
 ): MethodEndpointHandlerRegistryEntry<ExtractEndpointFromPath<TApiDef, TPath>, `${TPathParams}${ExtractTypedParamsFromMethodFirstPath<TPath>}`>;
+*/
 
 export function route<
   TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
