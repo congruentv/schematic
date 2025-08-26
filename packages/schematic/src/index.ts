@@ -13,3 +13,4 @@ export * from "./api_client.js";
 export * from "./api_client_http_method_call.js";
 export * from "./http_status_code.js";
 export * from "./typed_path_params.js";
+export * from "./di_container.js";
