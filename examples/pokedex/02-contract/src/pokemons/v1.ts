@@ -20,6 +20,14 @@ export const PokemonSchema = z.object({
 export type Pokemon = z.output<typeof PokemonSchema>;
 
 export const CreatePokemonSchema = PokemonSchema.omit({ id: true });
+// const result = CreatePokemonSchema.safeParse({
+//   name: "Bulbasaur",
+//   type: "grassx",
+//   description: "A grass-type Pokémon."
+// });
+// if (!result.success) {
+//   const errors = z.treeifyError(result.error);  
+// }
 
 export type CreatePokemon = z.output<typeof CreatePokemonSchema>;
 
@@ -27,7 +35,7 @@ export const NotFoundSchema = z.object({
   userMessage: z.string(),
 });
 
-export const pokemonsV1ApiContract = apiContract({
+export const v1_pokemons = apiContract({
   pokemons: {
     GET: endpoint({
       query: z.object({

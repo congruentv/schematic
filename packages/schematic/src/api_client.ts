@@ -30,7 +30,7 @@ class InnerApiClient<TDef extends IApiContractDefinition & ValidateApiContractDe
   __CONTEXT__: IClientContext;
 
   constructor(contract: ApiContract<TDef>, clientGenericHandler: ClientHttpMethodEndpointHandler) {
-    const clonedDefinition = contract._cloneDefinition();
+    const clonedDefinition = contract.cloneDefinition();
 
     const proto = { ...InnerApiClient.prototype };
     Object.assign(proto, Object.getPrototypeOf(clonedDefinition));

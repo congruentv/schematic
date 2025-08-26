@@ -1,0 +1,25 @@
+{
+  "name": "@pokedex/api-service",
+  "type": "module",
+  "version": "0.0.6",
+  "packageManager": "pnpm@10.8.1",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "npx tsc --noEmit && npx tsx --inspect=10000 --watch src/index.ts"
+  },
+  "dependencies": {
+    "@congruentv/schematic": "workspace:*",
+    "@congruentv/schematic-adapter-express": "workspace:*",
+    "@pokedex/contract": "workspace:*",
+    "body-parser": "catalog:",
+    "cors": "catalog:",
+    "express": "catalog:"
+  },
+  "devDependencies": {
+    "@types/body-parser": "catalog:",
+    "@types/cors": "catalog:",
+    "@types/express": "catalog:",
+    "tsx": "catalog:",
+    "typescript": "catalog:"
+  }
+}

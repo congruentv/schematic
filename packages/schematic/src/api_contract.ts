@@ -39,8 +39,7 @@ export class ApiContract<const TDef extends IApiContractDefinition & ValidateApi
     // this.__DEF__ = ApiContract._deepClone(definition, []) as TDef;
   }
 
-  /** @internal */
-  _cloneDefinition(): TDef {
+  cloneDefinition(): TDef {
     return ApiContract._deepClone(this.__DEF__, []) as TDef;
   }
 

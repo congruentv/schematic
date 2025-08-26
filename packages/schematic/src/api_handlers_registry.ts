@@ -135,7 +135,7 @@ class InnerApiHandlersRegistry<TDef extends IApiContractDefinition & ValidateApi
     contract: ApiContract<TDef>, 
     callback: GenericOnHandlerRegisteredCallback
   ) {
-    const clonedDefinition = contract._cloneDefinition();
+    const clonedDefinition = contract.cloneDefinition();
 
     const proto = { ...InnerApiHandlersRegistry.prototype };
     Object.assign(proto, Object.getPrototypeOf(clonedDefinition));

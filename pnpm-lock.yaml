@@ -171,6 +171,43 @@ importers:
         specifier: 'catalog:'
         version: 4.0.10
 
+  examples/pokedex/03-api-service:
+    dependencies:
+      '@congruentv/schematic':
+        specifier: workspace:*
+        version: link:../../../packages/schematic
+      '@congruentv/schematic-adapter-express':
+        specifier: workspace:*
+        version: link:../../../packages/schematic-adapter-express
+      '@pokedex/contract':
+        specifier: workspace:*
+        version: link:../02-contract
+      body-parser:
+        specifier: 'catalog:'
+        version: 2.2.0
+      cors:
+        specifier: 'catalog:'
+        version: 2.8.5
+      express:
+        specifier: 'catalog:'
+        version: 5.1.0
+    devDependencies:
+      '@types/body-parser':
+        specifier: 'catalog:'
+        version: 1.19.6
+      '@types/cors':
+        specifier: 'catalog:'
+        version: 2.8.19
+      '@types/express':
+        specifier: 'catalog:'
+        version: 5.0.3
+      tsx:
+        specifier: 'catalog:'
+        version: 4.20.3
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.2
+
   packages/schematic:
     dependencies:
       zod:
