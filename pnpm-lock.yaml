@@ -162,6 +162,15 @@ importers:
         specifier: 'catalog:'
         version: 5.9.2
 
+  examples/pokedex/02-contract:
+    dependencies:
+      '@congruentv/schematic':
+        specifier: workspace:*
+        version: link:../../../packages/schematic
+      zod:
+        specifier: 'catalog:'
+        version: 4.0.10
+
   packages/schematic:
     dependencies:
       zod:

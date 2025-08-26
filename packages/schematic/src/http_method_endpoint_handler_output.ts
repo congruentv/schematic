@@ -4,15 +4,23 @@ import { HttpStatusCode } from './http_status_code.js';
 import { HttpMethodEndpointResponse } from './http_method_endpoint_response.js';
 
 export type HttpMethodEndpointHandlerOutput<TEndpointDefinition extends IHttpMethodEndpointDefinition> = {
-  [THttpStatusCode in keyof TEndpointDefinition['responses'] & HttpStatusCode]: {
-    code: THttpStatusCode;
-    body: TEndpointDefinition['responses'][THttpStatusCode] extends HttpMethodEndpointResponse<THttpStatusCode, infer TRespDef>
-      ? TRespDef['body'] extends z.ZodType
-        ? z.input<TRespDef['body']> // z.input was used just in case validation of the response body is needed
-        : undefined
-      : undefined;
-  };
+  [THttpStatusCode in keyof TEndpointDefinition['responses'] & HttpStatusCode]: 
+    TEndpointDefinition['responses'][THttpStatusCode] extends HttpMethodEndpointResponse<THttpStatusCode, infer TRespDef>
+      ? CreateHandlerOutput<THttpStatusCode, TRespDef>
+      : never;
 }[keyof TEndpointDefinition['responses'] & HttpStatusCode];
+
+type CreateHandlerOutput<THttpStatusCode extends HttpStatusCode, TRespDef> = 
+  TRespDef extends { body: z.ZodType }
+    ? {
+        code: THttpStatusCode;
+        body: z.input<TRespDef['body']>;
+      }
+    : {
+        code: THttpStatusCode;
+        // Explicitly forbid body property when response has no body
+        body?: never; // it still allows undefined, but that is fine
+      };
 
 export type ClientHttpMethodEndpointHandlerOutput = {
   code: HttpStatusCode;
