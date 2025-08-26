@@ -30,7 +30,7 @@ export function route<
 >(
   apiReg: ApiHandlersRegistry<TApiDef, TPathParams>,
   path: TPath
-): MethodEndpointHandlerRegistryEntry<ExtractEndpointFromPath<TApiDef, TPath>, ExtractTypedParamsFromMethodFirstPath<TPath>> {
+): MethodEndpointHandlerRegistryEntry<ExtractEndpointFromPath<TApiDef, TPath>, `${TPathParams}${ExtractTypedParamsFromMethodFirstPath<TPath>}`, {}> {
   const pathStr = path as string;
   const spaceIndex = pathStr.indexOf(' ');
   if (spaceIndex === -1) {
@@ -39,7 +39,7 @@ export function route<
   const method = pathStr.substring(0, spaceIndex) as HttpMethod;
   const urlPath = pathStr.substring(spaceIndex + 1);
   const pathSegments = urlPath.split('/').filter((segment: string) => segment.length > 0);
-  return routeByPathSegments(apiReg, pathSegments, method) as MethodEndpointHandlerRegistryEntry<ExtractEndpointFromPath<TApiDef, TPath>, ExtractTypedParamsFromMethodFirstPath<TPath>>;
+  return routeByPathSegments(apiReg, pathSegments, method) as any;
 }
 
 export function routeByPathSegments<
@@ -49,7 +49,7 @@ export function routeByPathSegments<
   registry: ApiHandlersRegistry<TDef, TPathParams>,
   pathSegments: readonly string[],
   method: HttpMethod
-): MethodEndpointHandlerRegistryEntry<any, TPathParams> {
+): unknown {
   let current: any = registry;
   for (const segment of pathSegments) {
     if (current[segment] instanceof MethodEndpointHandlerRegistryEntry) {

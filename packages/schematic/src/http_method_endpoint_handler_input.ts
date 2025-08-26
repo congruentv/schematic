@@ -5,7 +5,8 @@ import { TypedPathParams } from "./typed_path_params.js";
 
 export type HttpMethodEndpointHandlerInput<
   TEndpointDefinition extends IHttpMethodEndpointDefinition,
-  TPathParams extends string
+  TPathParams extends string,
+  TInjected
 > = {
   method: HttpMethod;
   pathSegments: readonly string[];
@@ -15,6 +16,7 @@ export type HttpMethodEndpointHandlerInput<
   pathParams: TypedPathParams<TPathParams>;
   query: TEndpointDefinition['query'] extends z.ZodType ? z.output<TEndpointDefinition['query']> : null; // z.output because the handler receives the parsed input
   body: TEndpointDefinition['body'] extends z.ZodType ? z.output<TEndpointDefinition['body']> : null; // z.output because the handler receives the parsed input
+  injected: Readonly<TInjected>;
 };
 
 export type ClientHttpMethodEndpointHandlerInput = {

@@ -5,22 +5,7 @@ import { IHttpMethodEndpointDefinition, ValidateHttpMethodEndpointDefinition } f
 import { HttpMethodEndpointHandler } from "./http_method_endpoint_handler.js";
 import { ExtractTypedParamsFromMethodFirstPath } from "./typed_path_params.js";
 
-
 // Overload for registerMethodPathHandler
-
-/* // TODO: clean up
-export function register<
-  const TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
-  const TPath extends MethodFirstPath<TApiDef>
->(
-  apiReg: ApiHandlersRegistry<TApiDef, "">,
-  path: TPath,
-  handler: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, ExtractTypedParamsFromMethodFirstPath<TPath>>
-): void;
-
-// Overload for registerMethodPathHandler with partial api definition
-*/
-
 export function register<
   const TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
   TPathParams extends string,
@@ -28,7 +13,7 @@ export function register<
 >(
   apiReg: ApiHandlersRegistry<TApiDef, TPathParams>,
   path: TPath,
-  handler: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, `${TPathParams}${ExtractTypedParamsFromMethodFirstPath<TPath>}`>
+  handler: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, `${TPathParams}${ExtractTypedParamsFromMethodFirstPath<TPath>}`, {}>
 ): void;
 
 // Overload for registerEntryHandler
@@ -37,7 +22,7 @@ export function register<
   TPathParams extends string
 >(
   endpointEntry: MethodEndpointHandlerRegistryEntry<TDef, TPathParams>,
-  handler: HttpMethodEndpointHandler<TDef, TPathParams>
+  handler: HttpMethodEndpointHandler<TDef, TPathParams, {}>
 ): void;
 
 // Implementation
@@ -48,8 +33,8 @@ export function register<
   TPathParams extends string
 >(
   apiRegOrEndpoint: ApiHandlersRegistry<TApiDef, ""> | MethodEndpointHandlerRegistryEntry<TDef, TPathParams>,
-  pathOrHandler: TPath | HttpMethodEndpointHandler<TDef, TPathParams>,
-  handler?: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, ExtractTypedParamsFromMethodFirstPath<TPath>>
+  pathOrHandler: TPath | HttpMethodEndpointHandler<TDef, TPathParams, {}>,
+  handler?: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, ExtractTypedParamsFromMethodFirstPath<TPath>, {}>
 ): void {
   if (arguments.length === 3 && handler !== undefined) {
     registerMethodPathHandler(
@@ -59,32 +44,33 @@ export function register<
     );
   } else if (arguments.length === 2) {
     registerEntryHandler(
-      apiRegOrEndpoint as MethodEndpointHandlerRegistryEntry<TDef, TPathParams>,
-      pathOrHandler as HttpMethodEndpointHandler<TDef, TPathParams>
+      apiRegOrEndpoint as MethodEndpointHandlerRegistryEntry<TDef, TPathParams, any>,
+      pathOrHandler as HttpMethodEndpointHandler<TDef, TPathParams, any>
     );
   } else {
     throw new Error('Invalid number of arguments provided to register function');
   }
 }
 
-export function registerMethodPathHandler<
+function registerMethodPathHandler<
   const TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
+  TPathParams extends string,
   const TPath extends MethodFirstPath<TApiDef>
 >(
   apiReg: ApiHandlersRegistry<TApiDef, "">,
   path: TPath,
-  handler: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, ExtractTypedParamsFromMethodFirstPath<TPath>>
+  handler: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, `${TPathParams}${ExtractTypedParamsFromMethodFirstPath<TPath>}`, any>
 ) {
   const endpointEntry = route(apiReg, path);
   return registerEntryHandler(endpointEntry, handler);
 }
 
-export function registerEntryHandler<
+function registerEntryHandler<
   const TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
   TPathParams extends string
 >(
   endpointEntry: MethodEndpointHandlerRegistryEntry<TDef, TPathParams>,
-  handler: HttpMethodEndpointHandler<TDef, TPathParams>
+  handler: HttpMethodEndpointHandler<TDef, TPathParams, any>
 ) {
   endpointEntry.register(handler);
 }

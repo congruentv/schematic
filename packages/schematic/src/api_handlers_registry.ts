@@ -15,22 +15,23 @@ export function createRegistry<
 export type PrepareRegistryEntryCallback<
   TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
   TPathParams extends string
-> = (entry: MethodEndpointHandlerRegistryEntry<TDef, TPathParams>) => void;
+> = (entry: MethodEndpointHandlerRegistryEntry<TDef, TPathParams, any>) => void;
 
 export type OnHandlerRegisteredCallback<
   TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
   TPathParams extends string
-> = (entry: MethodEndpointHandlerRegistryEntry<TDef, TPathParams>) => void;
+> = (entry: MethodEndpointHandlerRegistryEntry<TDef, TPathParams, any>) => void;
 
 export type GenericOnHandlerRegisteredCallback = 
   OnHandlerRegisteredCallback<
-    IHttpMethodEndpointDefinition 
-    & ValidateHttpMethodEndpointDefinition<IHttpMethodEndpointDefinition>, string
+    IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<IHttpMethodEndpointDefinition>, 
+    string
   >;
 
 export class MethodEndpointHandlerRegistryEntry<
   TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
-  TPathParams extends string
+  TPathParams extends string,
+  TInjected = {}
 > {
   private _methodEndpoint: HttpMethodEndpoint<TDef>;
   get methodEndpoint(): HttpMethodEndpoint<TDef> {
@@ -41,8 +42,8 @@ export class MethodEndpointHandlerRegistryEntry<
     this._methodEndpoint = methodEndpoint;
   }
 
-  private _handler: HttpMethodEndpointHandler<TDef, TPathParams> | null = null;
-  register(handler: HttpMethodEndpointHandler<TDef, TPathParams>): void {
+  private _handler: HttpMethodEndpointHandler<TDef, TPathParams, TInjected> | null = null;
+  register(handler: HttpMethodEndpointHandler<TDef, TPathParams, TInjected>): void {
     this._handler = handler;
     if (this._onHandlerRegisteredCallback) {
       this._onHandlerRegisteredCallback(this);
@@ -57,6 +58,12 @@ export class MethodEndpointHandlerRegistryEntry<
   prepare(callback: PrepareRegistryEntryCallback<TDef, TPathParams>) {
     callback(this);
     return this;
+  }
+
+  private _injected: any = {};
+  inject<TNewInjected>(injected: TNewInjected): MethodEndpointHandlerRegistryEntry<TDef, TPathParams, TNewInjected> {
+    this._injected = injected;
+    return this as unknown as MethodEndpointHandlerRegistryEntry<TDef, TPathParams, TNewInjected>;
   }
 
   async trigger(data: { 
@@ -125,7 +132,8 @@ export class MethodEndpointHandlerRegistryEntry<
       headers: data.headers,
       pathParams: data.pathParams as any, 
       query: data.query as any, 
-      body: data.body as any
+      body: data.body as any,
+      injected: this._injected as any,
     });
   }
 }

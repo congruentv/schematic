@@ -4,9 +4,10 @@ import { ClientHttpMethodEndpointHandlerOutput, HttpMethodEndpointHandlerOutput 
 
 export type HttpMethodEndpointHandler<
   TDef extends IHttpMethodEndpointDefinition,
-  TPathParams extends string
+  TPathParams extends string,
+  TInjected
 > = 
-  (input: HttpMethodEndpointHandlerInput<TDef, TPathParams>) => Promise<HttpMethodEndpointHandlerOutput<TDef>>;
+  (input: HttpMethodEndpointHandlerInput<TDef, TPathParams, TInjected>) => Promise<HttpMethodEndpointHandlerOutput<TDef>>;
 
 export type ClientHttpMethodEndpointHandler = 
   (input: ClientHttpMethodEndpointHandlerInput) => Promise<ClientHttpMethodEndpointHandlerOutput>;
