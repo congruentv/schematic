@@ -141,7 +141,8 @@ export class MethodEndpointHandlerRegistryEntry<
 class InnerApiHandlersRegistry<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>> {
   constructor(
     contract: ApiContract<TDef>, 
-    callback: GenericOnHandlerRegisteredCallback
+    callback: GenericOnHandlerRegisteredCallback,
+    /* container */
   ) {
     const clonedDefinition = contract.cloneDefinition();
 
@@ -150,17 +151,20 @@ class InnerApiHandlersRegistry<TDef extends IApiContractDefinition & ValidateApi
     Object.setPrototypeOf(this, proto);
     Object.assign(this, clonedDefinition);
 
-    InnerApiHandlersRegistry._implement(this, callback);
+    InnerApiHandlersRegistry._implement(this, callback, /* container */);
   }
 
   private static _implement(
     currObj: any,
-    callback: GenericOnHandlerRegisteredCallback
+    callback: GenericOnHandlerRegisteredCallback,
+    /* container */
   ): void {
     for (const key of Object.keys(currObj)) {
       const value = currObj[key];
       if (value instanceof HttpMethodEndpoint) {
-        const entry = new MethodEndpointHandlerRegistryEntry(value);
+        const entry = new MethodEndpointHandlerRegistryEntry(value, /* container */);
+        // if the container is passed here, dependencies can be resolved in the handler
+        // but they can't be resolved within middleware
         entry._onHandlerRegistered(callback);
         currObj[key] = entry;
       } else if (typeof value === "object" && value !== null) {

@@ -1,8 +1,6 @@
-import { route, HttpStatusCode as s, Container } from "@congruentv/schematic";
+import { route, HttpStatusCode as s, DIContainer } from "@congruentv/schematic";
 import { Pokemon } from "@pokedex/contract/src/pokemons/v1.js";
 import { providePokedexApi } from "../provider.js";
-
-const container = new Container();
 
 interface ILoggerService {
   log(message: string): void;
@@ -36,24 +34,44 @@ class PokemonService implements IPokemonService {
 }
 
 
-container.register(LoggerService, () => {
-  const prefix = '[LOG-X]: ';
-  return ({
-    log: (message: string) => {
-      console.log(`${prefix}${message}`)
-    }
-  })
-}, 'singleton');
+// container.register(LoggerService, () => {
+//   const prefix = '[LOG-X]: ';
+//   return ({
+//     log: (message: string) => {
+//       console.log(`${prefix}${message}`)
+//     }
+//   })
+// }, 'singleton');
 
-// container.register(LoggerService, () => new LoggerService(), 'singleton');
-container.register(PokemonService, (c) => new PokemonService(c.get(LoggerService)), 'transient');
+const container = new DIContainer()
+  .register('LoggerSvc', () => new LoggerService(), 'singleton')
+  // .register('LoggerSvc', () => {
+  //   const prefix = '[LOG-TEST]: ';
+  //   return ({
+  //     log: (msg: string) => { 
+  //       return console.log(`${prefix}${msg}`)
+  //     }
+  //   } satisfies LoggerService);
+  // }, 'singleton')
+  .register('PokemonSvc', (c) => new PokemonService(c.getLoggerSvc()), 'transient');
+
+const logger = container.getLoggerSvc();
+// This should now work and logger should have the correct type
+logger.log("Testing logger");
+
+// Test that we get the right service
+const pokemonService = container.getPokemonSvc();
+console.log(pokemonService.getPokemon(1));
+
+// This line should cause a compilation error:
+// const invalid = container.getInvalidService();
 
 const pokedexApiReg = providePokedexApi();
 
 // pokedexApiReg.api.v1.pokemons[":id"].GET
 route(pokedexApiReg, 'GET /api/v1/pokemons/:id')
   .inject({
-    pokemonSvc: container.get(PokemonService),
+    pokemonSvc: container.getPokemonSvc()
     //svc: PokemonService
   })
   .register(async (req) => {
