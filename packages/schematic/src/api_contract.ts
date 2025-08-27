@@ -6,7 +6,7 @@ export function apiContract<const TDef extends IApiContractDefinition & Validate
 }
 
 export interface IApiContractDefinition {
-  [key: string]: IApiContractDefinition | HttpMethodEndpoint<any>;
+  readonly [key: string]: IApiContractDefinition | HttpMethodEndpoint<any>;
 }
 
 function isApiContractDefinition(obj: any): obj is IApiContractDefinition {
@@ -29,33 +29,28 @@ export type ValidateApiContractDefinition<T> = {
 
 export class ApiContract<const TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>> {
   
-  /** @internal */
-  __DEF__: TDef;
-  
+  readonly definition: TDef;
   constructor(definition: TDef) {
-    this.__DEF__ = definition;
-
-    // TODO: would this help with anything?
-    // this.__DEF__ = ApiContract._deepClone(definition, []) as TDef;
+    this.definition = definition;
   }
 
-  cloneDefinition(): TDef {
-    return ApiContract._deepClone(this.__DEF__, []) as TDef;
+  cloneInitDef(): TDef {
+    return ApiContract._deepCloneInitDef(this.definition, []) as TDef;
   }
 
-  private static _deepClone(
+  private static _deepCloneInitDef(
     definition: IApiContractDefinition,
     path: readonly string[]
   ): IApiContractDefinition {
-    const result: IApiContractDefinition = {};
+    const result: any = {};
     for (const key in definition) {
       const value = definition[key];
       if (value instanceof HttpMethodEndpoint) {
         result[key] = value._cloneWith(path, key);
       } else if (isApiContractDefinition(value)) {
-        result[key] = ApiContract._deepClone(value, [...path, key]);
+        result[key] = ApiContract._deepCloneInitDef(value, [...path, key]);
       }
     }
-    return result;
+    return result as IApiContractDefinition;
   }
 }

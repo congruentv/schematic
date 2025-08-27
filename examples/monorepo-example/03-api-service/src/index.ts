@@ -31,7 +31,7 @@ const pokemons: Pokemon[] = [
 
 const api = createExpressRegistry(app, pokemonApiContract);
 
-type ContractDef = typeof pokemonApiContract.__DEF__;
+type ContractDef = typeof pokemonApiContract.definition;
 
 const mfp: MethodFirstPath<ContractDef> = 'GET /greet/:name/preferred-salute/:salute';
 console.log('mfp', mfp, mfp.length);

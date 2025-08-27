@@ -144,17 +144,17 @@ class InnerApiHandlersRegistry<TDef extends IApiContractDefinition & ValidateApi
     callback: GenericOnHandlerRegisteredCallback,
     /* container */
   ) {
-    const clonedDefinition = contract.cloneDefinition();
+    const initializedDefinition = contract.cloneInitDef();
 
     const proto = { ...InnerApiHandlersRegistry.prototype };
-    Object.assign(proto, Object.getPrototypeOf(clonedDefinition));
+    Object.assign(proto, Object.getPrototypeOf(initializedDefinition));
     Object.setPrototypeOf(this, proto);
-    Object.assign(this, clonedDefinition);
+    Object.assign(this, initializedDefinition);
 
-    InnerApiHandlersRegistry._implement(this, callback, /* container */);
+    InnerApiHandlersRegistry._initialize(this, callback, /* container */);
   }
 
-  private static _implement(
+  private static _initialize(
     currObj: any,
     callback: GenericOnHandlerRegisteredCallback,
     /* container */
@@ -168,7 +168,7 @@ class InnerApiHandlersRegistry<TDef extends IApiContractDefinition & ValidateApi
         entry._onHandlerRegistered(callback);
         currObj[key] = entry;
       } else if (typeof value === "object" && value !== null) {
-        InnerApiHandlersRegistry._implement(value, callback);
+        InnerApiHandlersRegistry._initialize(value, callback);
       }
     }
   }

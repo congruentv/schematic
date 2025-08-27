@@ -25,7 +25,7 @@ export type ValidateHttpMethodEndpointDefinition<TDef extends IHttpMethodEndpoin
 }
 
 export type HttpMethodEndpointResponses = Partial<{
-  [status in HttpStatusCode]: HttpMethodEndpointResponse<status, any>;
+  readonly [status in HttpStatusCode]: HttpMethodEndpointResponse<status, any>;
 }>;
 
 export class HttpMethodEndpoint<const TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>> {

@@ -30,14 +30,14 @@ class InnerApiClient<TDef extends IApiContractDefinition & ValidateApiContractDe
   __CONTEXT__: IClientContext;
 
   constructor(contract: ApiContract<TDef>, clientGenericHandler: ClientHttpMethodEndpointHandler) {
-    const clonedDefinition = contract.cloneDefinition();
+    const initializedDefinition = contract.cloneInitDef();
 
     const proto = { ...InnerApiClient.prototype };
-    Object.assign(proto, Object.getPrototypeOf(clonedDefinition));
+    Object.assign(proto, Object.getPrototypeOf(initializedDefinition));
     Object.setPrototypeOf(this, proto);
-    Object.assign(this, clonedDefinition);
+    Object.assign(this, initializedDefinition);
 
-    InnerApiClient._implement(this, this, clientGenericHandler);
+    InnerApiClient._initialize(this, this, clientGenericHandler);
 
     this.__CONTEXT__ = InnerApiClient._initNewContext();
   }
@@ -48,7 +48,7 @@ class InnerApiClient<TDef extends IApiContractDefinition & ValidateApiContractDe
     };
   }
 
-  private static _implement<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>>(
+  private static _initialize<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>>(
     client: InnerApiClient<TDef>,
     currObj: any, 
     clientGenericHandler: ClientHttpMethodEndpointHandler
@@ -65,7 +65,7 @@ class InnerApiClient<TDef extends IApiContractDefinition & ValidateApiContractDe
           return val;
         });
         delete currObj[key];
-        InnerApiClient._implement(client, val, clientGenericHandler);
+        InnerApiClient._initialize(client, val, clientGenericHandler);
       } else if (val instanceof HttpMethodEndpoint) {
         currObj[key] = (req: never | { headers: Record<string, string>; query: Record<string, any>; body: any }) => {
           const pathParams = { ...client.__CONTEXT__.pathParameters };
@@ -132,7 +132,7 @@ class InnerApiClient<TDef extends IApiContractDefinition & ValidateApiContractDe
           });
         };
       } else if (typeof val === 'object' && val !== null) {
-        InnerApiClient._implement(client, val, clientGenericHandler);
+        InnerApiClient._initialize(client, val, clientGenericHandler);
       }
     }
   }
