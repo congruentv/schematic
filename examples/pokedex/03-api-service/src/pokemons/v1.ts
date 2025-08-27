@@ -55,12 +55,15 @@ const container = new DIContainer()
   // }, 'singleton')
   .register('PokemonSvc', (c) => new PokemonService(c.getLoggerSvc()), 'transient');
 
-const logger = container.getLoggerSvc();
+// Create a scope for typed method access
+const scope = container.createScope();
+
+const logger = scope.getLoggerSvc();
 // This should now work and logger should have the correct type
 logger.log("Testing logger");
 
 // Test that we get the right service
-const pokemonService = container.getPokemonSvc();
+const pokemonService = scope.getPokemonSvc();
 console.log(pokemonService.getPokemon(1));
 
 // This line should cause a compilation error:
@@ -71,7 +74,7 @@ const pokedexApiReg = providePokedexApi();
 // pokedexApiReg.api.v1.pokemons[":id"].GET
 route(pokedexApiReg, 'GET /api/v1/pokemons/:id')
   .inject({
-    pokemonSvc: container.getPokemonSvc()
+    pokemonSvc: scope.getPokemonSvc()
     //svc: PokemonService
   })
   .register(async (req) => {

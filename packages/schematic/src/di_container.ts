@@ -1,18 +1,25 @@
 // A helper type to represent a class constructor that creates an instance of type T.
 export type DIClass<T> = new (...args: any[]) => T;
 
-// Define the scope for dependency instances.
-export type DIScope = 'singleton' | 'transient';
+// Define the lifetime for dependency instances.
+export type DILifetime = 'singleton' | 'transient' | 'scoped';
 
 // Define the shape of a registration entry.
 interface DIRegistration {
   factory: (container: any) => any;
-  scope: DIScope;
+  lifetime: DILifetime;
 }
 
 // A type to map service names (as strings) to their class types.
 // e.g., { LoggerService: LoggerService, DatabaseService: DatabaseService }
 type DIServiceRegistry = Record<string, any>;
+
+/**
+ * A scoped container that provides typed method access to services.
+ */
+export type DIScope<R extends DIServiceRegistry> = {
+  [K in keyof R as `get${string & K}`]: () => R[K]
+};
 
 /**
  * This is the core of the static typing. It's a "mapped type" that takes a
@@ -68,9 +75,9 @@ export class DIContainer<R extends DIServiceRegistry = {}> {
   public register<T, N extends string>(
     serviceName: N,
     factory: (container: DITypedContainer<R>) => T,
-    scope: DIScope = 'transient'
+    lifetime: DILifetime = 'transient'
   ): DITypedContainer<R & Record<N, T>> {
-    this.registry.set(serviceName, { factory, scope });
+    this.registry.set(serviceName, { factory, lifetime });
     return this as unknown as DITypedContainer<R & Record<N, T>>;
   }
 
@@ -84,7 +91,7 @@ export class DIContainer<R extends DIServiceRegistry = {}> {
       throw new Error(`Service not registered: ${serviceName}`);
     }
 
-    if (registration.scope === 'singleton') {
+    if (registration.lifetime === 'singleton') {
       if (!this.singletons.has(serviceName)) {
         // The factory is called with the proxy container,
         // allowing dependencies to be resolved using the `get...` syntax.
@@ -95,5 +102,45 @@ export class DIContainer<R extends DIServiceRegistry = {}> {
     }
 
     return registration.factory(this.proxy);
+  }
+
+  /**
+   * Creates a scoped container with typed method access to services.
+   */
+  public createScope(): DIScope<R> {
+    const scope = {} as any;
+    
+    return new Proxy(scope, {
+      get: (target, prop) => {
+        // Intercept any method call that starts with "get".
+        if (typeof prop === 'string' && prop.startsWith('get')) {
+          // Extract the service name, e.g., "getPokemonSvc" -> "PokemonSvc".
+          const serviceName = prop.substring(3);
+          
+          // Find the registered service by service name.
+          if (this.registry.has(serviceName)) {
+            const registration = this.registry.get(serviceName);
+            
+            // Return a function that resolves the service
+            return () => {
+              // For transient services, always create new instances
+              if (registration?.lifetime === 'transient') {
+                return this.resolveByName(serviceName);
+              }
+              
+              // For singleton/scoped services, cache in the scope
+              const cacheKey = `_cached_${serviceName}`;
+              if (!target[cacheKey]) {
+                target[cacheKey] = this.resolveByName(serviceName);
+              }
+              return target[cacheKey];
+            };
+          }
+        }
+        
+        // For any other property, perform the default behavior.
+        return Reflect.get(target, prop);
+      }
+    }) as DIScope<R>;
   }
 }
