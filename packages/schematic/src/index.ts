@@ -6,6 +6,7 @@ export * from "./http_method_endpoint_handler_input.js";
 export * from "./http_method_endpoint_handler_output.js";
 export * from "./http_method_type.js";
 export * from "./api_handlers_registry.js";
+export * from "./api_handlers_registry_entry.js";
 export * from "./api_handlers_registry_partial.js";
 export * from "./api_handlers_registration.js";
 export * from "./api_routing.js";
