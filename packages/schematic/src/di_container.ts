@@ -41,11 +41,6 @@ export class DIContainer<R extends DIServiceRegistry = {}> {
   private singletons = new Map<string, any>();
   private proxy: any;
 
-  createTestClone(): this {
-    const clone = new DIContainer<R>();
-    return clone as this;
-  }
-
   /**
    * The constructor returns a Proxy. This is the runtime magic that intercepts
    * calls to methods like `getLoggerService()`. It parses the method name,
@@ -64,6 +59,8 @@ export class DIContainer<R extends DIServiceRegistry = {}> {
           if (target.registry.has(serviceName)) {
             // If found, return a function that resolves the service.
             return () => target.resolveByName(serviceName);
+          } else {
+            throw new Error(`Service not registered: ${serviceName}`);
           }
         }
         // For any other property (like 'register'), perform the default behavior.
@@ -140,6 +137,8 @@ export class DIContainer<R extends DIServiceRegistry = {}> {
               }
               return target[cacheKey];
             };
+          } else {
+            throw new Error(`Service not registered: ${serviceName}`);
           }
         }
         
@@ -147,5 +146,10 @@ export class DIContainer<R extends DIServiceRegistry = {}> {
         return Reflect.get(target, prop);
       }
     }) as DIScope<R>;
+  }
+
+  createTestClone(): this {
+    const clone = new DIContainer<R>();
+    return clone as this;
   }
 }

@@ -53,3 +53,7 @@ const testContainer = dicontainer.createTestClone()
     } satisfies LoggerService);
   }, 'singleton');
 testContainer.getLoggerSvc().log('This is a test log from the test container.');
+// testContainer.getPokemonSvc().getPokemon(25);
+
+// TODO: implement inprocess client/registry
+// const testPokedexApiReg = createRegistry(testContainer, pokedexApiContract, () => {});
