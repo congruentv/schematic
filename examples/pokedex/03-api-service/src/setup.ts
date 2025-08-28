@@ -38,7 +38,12 @@ app.use(cors());
 app.use(bodyParser.json());
 
 const dicontainer = new DIContainer()
-  //.register('LoggerSvc', () => new LoggerService(), 'singleton')
+  .register('LoggerSvc', () => new LoggerService(), 'singleton')
+  .register('PokemonSvc', (c) => new PokemonService(c.getLoggerSvc()), 'transient');
+
+export const pokedexApiReg = createExpressRegistry(app, dicontainer, pokedexApiContract);
+
+const testContainer = dicontainer.createTestClone()
   .register('LoggerSvc', () => {
     const prefix = '[LOG-TEST]: ';
     return ({
@@ -46,7 +51,5 @@ const dicontainer = new DIContainer()
         return console.log(`${prefix}${msg}`)
       }
     } satisfies LoggerService);
-  }, 'singleton')
-  .register('PokemonSvc', (c) => new PokemonService(c.getLoggerSvc()), 'transient');
-
-export const pokedexApiReg = createExpressRegistry(app, dicontainer, pokedexApiContract);
+  }, 'singleton');
+testContainer.getLoggerSvc().log('This is a test log from the test container.');

@@ -41,6 +41,11 @@ export class DIContainer<R extends DIServiceRegistry = {}> {
   private singletons = new Map<string, any>();
   private proxy: any;
 
+  createTestClone(): this {
+    const clone = new DIContainer<R>();
+    return clone as this;
+  }
+
   /**
    * The constructor returns a Proxy. This is the runtime magic that intercepts
    * calls to methods like `getLoggerService()`. It parses the method name,
