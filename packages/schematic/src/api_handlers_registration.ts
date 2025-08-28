@@ -1,6 +1,7 @@
 import { IApiContractDefinition, ValidateApiContractDefinition } from "./api_contract.js";
 import { ApiHandlersRegistry, MethodEndpointHandlerRegistryEntry } from "./api_handlers_registry.js";
 import { ExtractEndpointFromPath, MethodFirstPath, route } from "./api_routing.js";
+import { DIContainer } from "./di_container.js";
 import { IHttpMethodEndpointDefinition, ValidateHttpMethodEndpointDefinition } from "./http_method_endpoint.js";
 import { HttpMethodEndpointHandler } from "./http_method_endpoint_handler.js";
 import { ExtractTypedParamsFromMethodFirstPath } from "./typed_path_params.js";
@@ -8,10 +9,11 @@ import { ExtractTypedParamsFromMethodFirstPath } from "./typed_path_params.js";
 // Overload for registerMethodPathHandler
 export function register<
   const TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
+  TDIContainer extends DIContainer,
   TPathParams extends string,
   const TPath extends MethodFirstPath<TApiDef>
 >(
-  apiReg: ApiHandlersRegistry<TApiDef, TPathParams>,
+  apiReg: ApiHandlersRegistry<TApiDef, TDIContainer, TPathParams>,
   path: TPath,
   handler: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, `${TPathParams}${ExtractTypedParamsFromMethodFirstPath<TPath>}`, {}>
 ): void;
@@ -19,33 +21,35 @@ export function register<
 // Overload for registerEntryHandler
 export function register<
   const TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
+  TDIContainer extends DIContainer,
   TPathParams extends string
 >(
-  endpointEntry: MethodEndpointHandlerRegistryEntry<TDef, TPathParams>,
+  endpointEntry: MethodEndpointHandlerRegistryEntry<TDef, TDIContainer, TPathParams>,
   handler: HttpMethodEndpointHandler<TDef, TPathParams, {}>
 ): void;
 
 // Implementation
 export function register<
   const TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
+  TDIContainer extends DIContainer,
   const TPath extends MethodFirstPath<TApiDef>,
   const TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
   TPathParams extends string
 >(
-  apiRegOrEndpoint: ApiHandlersRegistry<TApiDef, ""> | MethodEndpointHandlerRegistryEntry<TDef, TPathParams>,
+  apiRegOrEndpoint: ApiHandlersRegistry<TApiDef, TDIContainer, TPathParams> | MethodEndpointHandlerRegistryEntry<TDef, TDIContainer, TPathParams>,
   pathOrHandler: TPath | HttpMethodEndpointHandler<TDef, TPathParams, {}>,
   handler?: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, ExtractTypedParamsFromMethodFirstPath<TPath>, {}>
 ): void {
   if (arguments.length === 3 && handler !== undefined) {
     registerMethodPathHandler(
-      apiRegOrEndpoint as ApiHandlersRegistry<TApiDef, "">,
-      pathOrHandler as TPath,
+      apiRegOrEndpoint as any,
+      pathOrHandler as any,
       handler
     );
   } else if (arguments.length === 2) {
     registerEntryHandler(
-      apiRegOrEndpoint as MethodEndpointHandlerRegistryEntry<TDef, TPathParams, any>,
-      pathOrHandler as HttpMethodEndpointHandler<TDef, TPathParams, any>
+      apiRegOrEndpoint as any,
+      pathOrHandler as any
     );
   } else {
     throw new Error('Invalid number of arguments provided to register function');
@@ -57,7 +61,7 @@ function registerMethodPathHandler<
   TPathParams extends string,
   const TPath extends MethodFirstPath<TApiDef>
 >(
-  apiReg: ApiHandlersRegistry<TApiDef, "">,
+  apiReg: ApiHandlersRegistry<TApiDef, any, any>,
   path: TPath,
   handler: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, `${TPathParams}${ExtractTypedParamsFromMethodFirstPath<TPath>}`, any>
 ) {
@@ -67,9 +71,10 @@ function registerMethodPathHandler<
 
 function registerEntryHandler<
   const TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
+  TDIContainer extends DIContainer,
   TPathParams extends string
 >(
-  endpointEntry: MethodEndpointHandlerRegistryEntry<TDef, TPathParams>,
+  endpointEntry: MethodEndpointHandlerRegistryEntry<TDef, TDIContainer, TPathParams>,
   handler: HttpMethodEndpointHandler<TDef, TPathParams, any>
 ) {
   endpointEntry.register(handler);

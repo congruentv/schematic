@@ -1,5 +1,6 @@
 import { IApiContractDefinition, ValidateApiContractDefinition } from "./api_contract.js";
 import { ApiHandlersRegistry, MethodEndpointHandlerRegistryEntry } from "./api_handlers_registry.js";
+import { DIContainer } from "./di_container.js";
 import { HttpMethodEndpoint } from "./http_method_endpoint.js";
 import { ExtractTypeParamsFromPathSegments } from "./typed_path_params.js";
 
@@ -8,22 +9,23 @@ export function partialPathString<
   TPathParams extends string,
   const TPath extends PartialPath<TApiDef>
 >(
-  _apiReg: ApiHandlersRegistry<TApiDef, TPathParams>,
+  _apiReg: ApiHandlersRegistry<TApiDef, any, TPathParams>,
   path: TPath
 ): string {
   return path as string;
 }
 
 export function partial<
+  TDIContainer extends DIContainer,
   TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
   TPathParams extends string,
   const TPath extends PartialPath<TApiDef>
 >(
-  apiReg: ApiHandlersRegistry<TApiDef, TPathParams>,
+  apiReg: ApiHandlersRegistry<TApiDef, TDIContainer, TPathParams>,
   path: TPath
 ): PartialPathResult<TApiDef, TPath> extends infer TPartialApi
   ? TPartialApi extends IApiContractDefinition & ValidateApiContractDefinition<TPartialApi>
-    ? ApiHandlersRegistry<TPartialApi, ExtractTypeParamsFromPathSegments<TPath>>
+    ? ApiHandlersRegistry<TPartialApi, TDIContainer, ExtractTypeParamsFromPathSegments<TPath>>
     : never
   : never {
   const pathSegments = (path as string).split('/').filter((segment: string) => segment.length > 0);

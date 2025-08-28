@@ -1,10 +1,3 @@
-// export type StatusCode =
-//   | 100 | 101
-//   | 200 | 201 | 202 | 204
-//   | 300 | 301 | 302 | 304
-//   | 400 | 401 | 403 | 404 | 409
-//   | 500 | 501 | 502 | 503 | 504;
-
 export enum HttpStatusCode {
   Continue_100 = 100,
   SwitchingProtocols_101 = 101,

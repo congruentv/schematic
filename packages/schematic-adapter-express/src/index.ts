@@ -12,16 +12,19 @@ import {
   ApiContract,
   PrepareRegistryEntryCallback,
   IHttpMethodEndpointDefinition,
-  ValidateHttpMethodEndpointDefinition
+  ValidateHttpMethodEndpointDefinition,
+  DIContainer
 } from '@congruentv/schematic';
 
 export function createExpressRegistry<
-  TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>
+  TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>,
+  TDIContainer extends DIContainer
 >(
   app: Express,
+  diContainer: TDIContainer,
   apiContract: ApiContract<TDef>
 ) {
-  const registry = createRegistry<TDef>(apiContract, (entry) => {
+  const registry = createRegistry<TDef, TDIContainer>(diContainer, apiContract, (entry) => {
     const { genericPath } = entry.methodEndpoint;
     const method = entry.methodEndpoint.method.toLowerCase() as LowerCasedHttpMethod;
     app[method](genericPath, async (req, res) => {
@@ -43,11 +46,12 @@ export function createExpressRegistry<
 
 export function expressPreHandler<
   TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
+  TDIContainer extends DIContainer,
   TPathParams extends string
 > (
   app: Express,
   prehandler: RequestHandler
-): PrepareRegistryEntryCallback<TDef, TPathParams> {
+): PrepareRegistryEntryCallback<TDef, TDIContainer, TPathParams> {
   return (({ methodEndpoint: { lowerCasedMethod, genericPath }}) => {
     app[lowerCasedMethod](genericPath, prehandler);
   });

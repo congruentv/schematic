@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 
-import { HttpStatusCode, route, register, partialPathString, PartialPath, MethodFirstPath, partial } from '@congruentv/schematic';
+import { HttpStatusCode, route, register, partialPathString, PartialPath, MethodFirstPath, partial, DIContainer } from '@congruentv/schematic';
 import { createExpressRegistry, expressPreHandler } from '@congruentv/schematic-adapter-express';
 
 import { 
@@ -29,7 +29,8 @@ const pokemons: Pokemon[] = [
   { id: 6, name: 'Charizard', description: 'Fire type', type: 'fire' },
 ];
 
-const api = createExpressRegistry(app, pokemonApiContract);
+const dicontainer = new DIContainer();
+const api = createExpressRegistry(app, dicontainer, pokemonApiContract);
 
 type ContractDef = typeof pokemonApiContract.definition;
 
