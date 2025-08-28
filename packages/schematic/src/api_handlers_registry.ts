@@ -3,6 +3,30 @@ import { MethodEndpointHandlerRegistryEntry, OnHandlerRegisteredCallback } from 
 import { DIContainer } from "./di_container.js";
 import { IHttpMethodEndpointDefinition, HttpMethodEndpoint, ValidateHttpMethodEndpointDefinition } from "./http_method_endpoint.js";
 
+export function flatListAllRegistryEntries<
+  TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>,
+  TDIContainer extends DIContainer
+>(
+  registry: ApiHandlersRegistry<TDef, TDIContainer>
+): MethodEndpointHandlerRegistryEntry<any, any, any, any>[] {
+  const entries: MethodEndpointHandlerRegistryEntry<any, any, any, any>[] = [];
+  for (const key of Object.keys(registry)) {
+    if (key === 'dicontainer') {
+      continue;
+    }
+    const value = registry[key];
+    if (value instanceof MethodEndpointHandlerRegistryEntry) {
+      entries.push(value);
+    } else if (typeof value === "object" && value !== null) {
+      const innerEntries = flatListAllRegistryEntries(value as any);
+      for (const entry of innerEntries) {
+        entries.push(entry);
+      }
+    }
+  }
+  return entries;
+}
+
 export function createRegistry<
   TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>,
   TDIContainer extends DIContainer

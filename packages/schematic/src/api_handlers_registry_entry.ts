@@ -37,6 +37,10 @@ export class MethodEndpointHandlerRegistryEntry<
   }
 
   private _handler: HttpMethodEndpointHandler<TDef, TPathParams, TInjected> | null = null;
+  public get handler(): HttpMethodEndpointHandler<TDef, TPathParams, TInjected> | null {
+    return this._handler;
+  }
+
   register(handler: HttpMethodEndpointHandler<TDef, TPathParams, TInjected>): void {
     this._handler = handler;
     if (this._onHandlerRegisteredCallback) {
@@ -55,6 +59,10 @@ export class MethodEndpointHandlerRegistryEntry<
   }
 
   private _injection: any = (_dicontainer: TDIContainer) => ({});
+  public get injection(): any {
+    return this._injection;
+  }
+
   inject<TNewInjected>(injection: (dicontainer: TDIContainer) => TNewInjected): MethodEndpointHandlerRegistryEntry<TDef, TDIContainer, TPathParams, TNewInjected> {
     this._injection = injection;
     return this as unknown as MethodEndpointHandlerRegistryEntry<TDef, TDIContainer, TPathParams, TNewInjected>;
