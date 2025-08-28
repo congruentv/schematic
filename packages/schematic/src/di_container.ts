@@ -1,3 +1,9 @@
+type StringLiteral<S> = S extends string
+  ? string extends S
+    ? never
+    : S
+  : never;
+
 // A helper type to represent a class constructor that creates an instance of type T.
 export type DIClass<T> = new (...args: any[]) => T;
 
@@ -75,11 +81,11 @@ export class DIContainer<R extends DIServiceRegistry = {}> {
    * Registers a service with explicit service name (fully type-safe).
    */
   public register<T, N extends string>(
-    serviceName: N,
+    serviceNameLiteral: StringLiteral<N>,
     factory: (container: DITypedContainer<R>) => T,
     lifetime: DILifetime = 'transient'
   ): DITypedContainer<R & Record<N, T>> {
-    this.registry.set(serviceName, { factory, lifetime });
+    this.registry.set(serviceNameLiteral, { factory, lifetime });
     return this as unknown as DITypedContainer<R & Record<N, T>>;
   }
 
