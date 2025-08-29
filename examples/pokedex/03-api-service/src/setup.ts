@@ -11,7 +11,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 export const dicontainer = new DIContainer()
-  .register('LoggerSvc', () => new LoggerService(), 'singleton')
+  .register('LoggerSvc', () => new LoggerService(), 'singleton') // here, the registration order matters, it forces the end developer to push common deps up in the chain
   .register('PokemonSvc', (c) => new PokemonService(c.getLoggerSvc()), 'transient');
 
 export const pokedexApiReg = createExpressRegistry(app, dicontainer, pokedexApiContract);
