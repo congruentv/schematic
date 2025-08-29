@@ -26,9 +26,9 @@ describe('My Test Suite', () => {
     if (result.code === HttpStatusCode.OK_200) {
       expect(result.body).toEqual({
         id: 25,
-        name: "Pikachu",
-        type: "electric",
-        description: "An electric-type Pokémon."
+        name: "Bulbasaur",
+        type: "grass",
+        description: "A grass-type Pokémon."
       });
     } else {
       expect.fail(`Unexpected status code: ${result.code}`);
