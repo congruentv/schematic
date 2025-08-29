@@ -10,6 +10,7 @@ export * from "./api_handlers_registry_entry.js";
 export * from "./api_handlers_registry_partial.js";
 export * from "./api_handlers_registration.js";
 export * from "./api_routing.js";
+export * from "./api_routing_partial.js";
 export * from "./api_client.js";
 export * from "./api_client_http_method_call.js";
 export * from "./http_status_code.js";

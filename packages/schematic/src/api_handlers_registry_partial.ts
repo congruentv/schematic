@@ -1,20 +1,9 @@
 import { IApiContractDefinition, ValidateApiContractDefinition } from "./api_contract.js";
 import { ApiHandlersRegistry } from "./api_handlers_registry.js";
 import { MethodEndpointHandlerRegistryEntry } from "./api_handlers_registry_entry.js";
+import { PartialPath } from "./api_routing_partial.js";
 import { DIContainer } from "./di_container.js";
-import { HttpMethodEndpoint } from "./http_method_endpoint.js";
 import { ExtractTypeParamsFromPathSegments } from "./typed_path_params.js";
-
-export function partialPathString<
-  TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
-  TPathParams extends string,
-  const TPath extends PartialPath<TApiDef>
->(
-  _apiReg: ApiHandlersRegistry<TApiDef, any, TPathParams>,
-  path: TPath
-): string {
-  return path as string;
-}
 
 export function partial<
   TDIContainer extends DIContainer,
@@ -31,7 +20,6 @@ export function partial<
   : never {
   const pathSegments = (path as string).split('/').filter((segment: string) => segment.length > 0);
   let current: any = apiReg;
-  
   for (const segment of pathSegments) {
     if (current[segment] instanceof MethodEndpointHandlerRegistryEntry) {
       throw new Error(`Path "${path}" is not partial`);
@@ -41,20 +29,8 @@ export function partial<
       throw new Error(`Path segment "${segment}" not found in API handlers registry`);
     }
   }
-  
   return current as any;
 }
-
-export type PartialPath<TDef, BasePath extends string = ""> =
-  | (BasePath extends "" ? "" : never)
-  | {
-      [K in keyof TDef & string]:
-        TDef[K] extends HttpMethodEndpoint<infer _TEndpointDef>
-          ? never
-          : TDef[K] extends object
-            ? `${BasePath}/${K}` | PartialPath<TDef[K], `${BasePath}/${K}`>
-            : never
-    }[keyof TDef & string];
 
 export type PartialPathResult<
   TApiDef extends IApiContractDefinition,
