@@ -24,22 +24,40 @@ export function createExpressRegistry<
   diContainer: TDIContainer,
   apiContract: ApiContract<TDef>
 ) {
-  const registry = createRegistry<TDef, TDIContainer>(diContainer, apiContract, (entry) => {
-    const { genericPath } = entry.methodEndpoint;
-    const method = entry.methodEndpoint.method.toLowerCase() as LowerCasedHttpMethod;
-    app[method](genericPath, async (req, res) => {
-      const pathParams = req.params;
-      const query = req.query;
-      const body = req.body;
-      const headers = JSON.parse(JSON.stringify(req.headers)); // TODO
-      const result = await entry.trigger({
-        headers,
-        pathParams,
-        query,
-        body,
+  const registry = createRegistry<TDef, TDIContainer>(diContainer, apiContract, {
+    handlerRegisteredCallback: (entry) => {
+      console.log('Registering Express route:', entry.methodEndpoint.genericPath);
+      const { genericPath } = entry.methodEndpoint;
+      const method = entry.methodEndpoint.method.toLowerCase() as LowerCasedHttpMethod;
+      app[method](genericPath, async (req, res) => {
+        const pathParams = req.params;
+        const query = req.query;
+        const body = req.body;
+        const headers = JSON.parse(JSON.stringify(req.headers)); // TODO
+        const result = await entry.trigger({
+          headers,
+          pathParams,
+          query,
+          body,
+        });
+        res.status(result.code).json(result.body);
       });
-      res.status(result.code).json(result.body);
-    });
+    },
+    middlewareHandlerRegisteredCallback: (middlewarePath, handler) => {
+      console.log('Registering Express middleware:', middlewarePath);
+      app.use(middlewarePath, (req, _res, next) => {
+        const pathParams = req.params;
+        const query = req.query;
+        const body = req.body;
+        const headers = JSON.parse(JSON.stringify(req.headers)); // TODO
+        handler({
+          headers,
+          pathParams,
+          query,
+          body,
+        }, next);
+      });
+    }
   });
   return registry;
 }

@@ -25,6 +25,7 @@ describe('My Test Suite', () => {
     expect(result.code).toBe(HttpStatusCode.OK_200);
     if (result.code === HttpStatusCode.OK_200) {
       expect(result.body).toEqual({
+        tenantId: 'XXX',
         id: 25,
         name: "Bulbasaur",
         type: "grass",

@@ -6,13 +6,17 @@ import { BaseRequestBodySchema } from "@pokedex/contract/src/pokemons/v1.js";
 
 // mdlw
 
-middleware(reg, '/api/v1/pokemons/:id')
+middleware(reg, '/api/v1/pokemons') // /:id
   .register({
     body: BaseRequestBodySchema
   },
   (req, next) => {
-    req.pathParams.id;
-    req.body.tenantId
+    //req.pathParams.id;
+    if (req.body) {
+      console.log('tenant id', req.body.tenantId);
+    } else {
+      console.log('No body provided');
+    }
     console.log('Middleware triggered for Pokemons API');
     next();
   });

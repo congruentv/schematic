@@ -65,31 +65,76 @@ export class MiddlewareHandlersRegistryEntry<
   TDIContainer extends DIContainer,
   TPathParams extends string,
   const TPath extends MiddlewarePath<TApiDef>
->{
+> {
   private readonly _registry: MiddlewareHandlersRegistry<TDIContainer>;
+  private readonly _path: TPath;
   constructor(
     registry: MiddlewareHandlersRegistry<TDIContainer>,
     _path: TPath
   ) {
     this._registry = registry;
+    this._path = _path;
   }
 
   register<const InputSchemas extends MiddlewareHandlerInputSchemas>(
     _inputSchemas: InputSchemas,
     _handler: MiddlewareHandler<`${TPathParams}${ExtractConcatenatedParamNamesFromPath<TPath>}`, InputSchemas>
   ) {
-    (this._registry._dicontainer as TDIContainer).createScope();
+    this._registry.register(this._path, _handler);
+    //(this._registry._dicontainer as TDIContainer).createScope();
   }
 }
 
+export type MiddlewareGenericHandler = (req: any, next: () => void) => void;
+
+export type OnMiddlewareHandlerRegisteredCallback = (middlewarePath: string, handler: MiddlewareGenericHandler) => void;
+
 export class MiddlewareHandlersRegistry<TDIContainer extends DIContainer> {
-  _dicontainer: unknown; 
+  private _dicontainer: unknown; 
   // can't use :TDIContainer type
   // Type instantiation is excessively deep and possibly infinite.ts(2589)
-
   constructor(
-    dicontainer: TDIContainer
+    dicontainer: TDIContainer,
+    callback: OnMiddlewareHandlerRegisteredCallback
   ) {
     this._dicontainer = dicontainer;
+    this._onHandlerRegisteredCallback = callback;
   }
+
+  register(middlewarePath: string, handler: MiddlewareGenericHandler) {
+    // const { method, pathSegments } = this._splitFullPath(middlewarePath);
+    if (this._onHandlerRegisteredCallback) {
+      this._onHandlerRegisteredCallback(middlewarePath, handler);
+    }
+  }
+
+  // TODO
+  trigger() {
+    (this._dicontainer as TDIContainer).createScope();
+  }
+
+  private _onHandlerRegisteredCallback: OnMiddlewareHandlerRegisteredCallback | null = null;
+  _onHandlerRegistered(callback: OnMiddlewareHandlerRegisteredCallback): void {
+    this._onHandlerRegisteredCallback = callback;
+  }
+
+  // private _splitFullPath(middlewarePath: string): { method: string; pathSegments: string[] } {
+  //   const splitResult = middlewarePath.split(" ");
+  //   let method: string = '';
+  //   let pathSegments: string[] = [];
+  //   if (splitResult.length === 2) {
+  //     method = splitResult[0].trim();
+  //     if (method === '') {
+  //       throw new Error(`Invalid middleware path format: "${middlewarePath}". HTTP method is empty.`);
+  //     }
+  //     pathSegments = splitResult[1]
+  //       .split("/")
+  //       .map(segment => segment.trim())
+  //       .filter(segment => segment !== '');
+  //   }
+  //   return {
+  //     method,
+  //     pathSegments
+  //   };
+  // }
 }

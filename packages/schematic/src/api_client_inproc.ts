@@ -13,9 +13,15 @@ export function createInProcApiClient<
   registry: ApiHandlersRegistry<TDef, TDIContainer>
 ) 
 {
-  const testApiReg = createRegistry(testContainer, contract, (_entry) => {
-    //console.log('Registering TEST route:', entry.methodEndpoint.genericPath);
+  const testApiReg = createRegistry(testContainer, contract, {
+    handlerRegisteredCallback: (_entry) => {
+      //console.log('Registering TEST route:', entry.methodEndpoint.genericPath);
+    },
+    middlewareHandlerRegisteredCallback: (_middlewarePath, _handler) => {
+      //console.log('Registering TEST middleware:', _middlewarePath);
+    },
   });
+
   flatListAllRegistryEntries(registry).forEach(entry => {
     if (!entry.handler) {
       return;
