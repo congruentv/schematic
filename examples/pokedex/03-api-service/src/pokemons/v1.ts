@@ -1,5 +1,21 @@
-import { route, HttpStatusCode as s } from "@congruentv/schematic";
+import { route, middleware, HttpStatusCode as s } from "@congruentv/schematic";
 import { pokedexApiReg as reg } from "../setup.js";
+import { BaseRequestBodySchema } from "@pokedex/contract/src/pokemons/v1.js";
+
+// const mdlw = middleware(reg, '/api/v1/pokemons/:id');
+
+// mdlw
+
+middleware(reg, '/api/v1/pokemons/:id')
+  .register({
+    body: BaseRequestBodySchema
+  },
+  (req, next) => {
+    req.pathParams.id;
+    req.body.tenantId
+    console.log('Middleware triggered for Pokemons API');
+    next();
+  });
 
 route(reg, 'GET /api/v1/pokemons/:id')
   .inject((c) => ({
@@ -20,6 +36,19 @@ route(reg, 'GET /api/v1/pokemons/:id')
     return {
       code: s.OK_200,
       body: pokemon
+    };
+  });
+
+// reg._middlewareRegistry
+  
+route(reg, 'POST /api/v1/pokemons')
+  .register(async (req) => {
+    // TODO: typesafe req.headers, now is :Record<string, string>
+    req.headers['x-custom-header']
+    req.body.tenantId
+    return {
+      code: s.Created_201,
+      body: 999
     };
   });
 

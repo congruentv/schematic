@@ -2,14 +2,6 @@ import { IApiContractDefinition, ValidateApiContractDefinition } from "./api_con
 import { ApiHandlersRegistry } from "./api_handlers_registry.js";
 import { HttpMethodEndpoint } from "./http_method_endpoint.js";
 
-function partialRoute() {
-  // TODO:
-  // returns an object on which you can call .middleware(req: BaseRequest, next)
-  // all full routes which lie under the partial route would/should have a request inheriting from BaseRequest ?
-    // - might be really hard to make it type safe
-    // - end developers might not want to inherit from BaseRequest
-}
-
 export function partialPathString<
   TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
   TPathParams extends string,

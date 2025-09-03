@@ -6,7 +6,13 @@ import {
   HttpStatusCode as s
 } from "@congruentv/schematic";
 
-export const PokemonSchema = z.object({
+export const BaseRequestBodySchema = z.object({
+  tenantId: z.string(),
+});
+
+export type BaseRequestBody = z.output<typeof BaseRequestBodySchema>;
+
+export const PokemonSchema = BaseRequestBodySchema.extend({
   id: z.number().int().min(1),
   name: z.string(),
   type: z.union([

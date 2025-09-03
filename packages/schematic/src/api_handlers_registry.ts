@@ -1,5 +1,6 @@
 import { ApiContract, IApiContractDefinition, ValidateApiContractDefinition } from "./api_contract.js";
 import { MethodEndpointHandlerRegistryEntry, OnHandlerRegisteredCallback } from "./api_handlers_registry_entry.js";
+import { MiddlewareHandlersRegistry } from "./api_middleware.js";
 import { DIContainer } from "./di_container.js";
 import { IHttpMethodEndpointDefinition, HttpMethodEndpoint, ValidateHttpMethodEndpointDefinition } from "./http_method_endpoint.js";
 
@@ -49,7 +50,10 @@ class InnerApiHandlersRegistry<
   TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>,
   TDIContainer extends DIContainer
 > {
-  // public readonly dicontainer: TDIContainer;
+  
+  /** @internal */
+  _middlewareRegistry: MiddlewareHandlersRegistry<TDIContainer>;
+
   constructor(
     dicontainer: TDIContainer,
     contract: ApiContract<TDef>, 
@@ -61,7 +65,7 @@ class InnerApiHandlersRegistry<
     Object.setPrototypeOf(this, proto);
     Object.assign(this, initializedDefinition);
     InnerApiHandlersRegistry._initialize(this, callback, dicontainer);
-    // this.dicontainer = dicontainer;
+    this._middlewareRegistry = new MiddlewareHandlersRegistry(dicontainer);
   }
 
   private static _initialize<TDIContainer extends DIContainer>(
@@ -70,8 +74,8 @@ class InnerApiHandlersRegistry<
     dicontainer: TDIContainer
   ): void {
     for (const key of Object.keys(currObj)) {
-      if (key === 'dicontainer') {
-        continue;
+      if (key === '_middlewareRegistry') {
+        continue; // skip the middleware property
       }
       const value = currObj[key];
       if (value instanceof HttpMethodEndpoint) {
@@ -107,7 +111,7 @@ export type ApiHandlersRegistry<
   TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>, 
   TDIContainer extends DIContainer,
   TPathParams extends string = "",
-> = ApiHandlersRegistryDef<InnerApiHandlersRegistry<TDef, TDIContainer> & TDef, TDIContainer, TPathParams>;
+> = Omit<ApiHandlersRegistryDef<InnerApiHandlersRegistry<TDef, TDIContainer> & TDef, TDIContainer, TPathParams>, '_middlewareRegistry'>;
 
 export const ApiHandlersRegistry: new <
   TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>, 

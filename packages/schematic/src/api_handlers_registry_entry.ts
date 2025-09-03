@@ -86,7 +86,7 @@ export class MethodEndpointHandlerRegistryEntry<
         || data.headers === null
         || data.headers === undefined
       ) {
-        throw new Error('Headers are required for this endpoint');
+        return { code: HttpStatusCode.BadRequest_400, body: 'Headers are required for this endpoint' };
       }
       const result = this._methodEndpoint.definition.headers.safeParse(data.headers);
       if (!result.success) {
@@ -100,7 +100,7 @@ export class MethodEndpointHandlerRegistryEntry<
         || data.query === null
         || data.query === undefined
       ) {
-        throw new Error('Query is required for this endpoint');
+        return { code: HttpStatusCode.BadRequest_400, body: `Query is required for this endpoint` };
       }
       const result = this._methodEndpoint.definition.query.safeParse(data.query);
       if (!result.success) {
@@ -114,7 +114,7 @@ export class MethodEndpointHandlerRegistryEntry<
         || data.body === null
         || data.body === undefined
       ) {
-        throw new Error(`Body is required for this endpoint, { 'Content-Type': 'application/json' } header might be missing`);
+        return { code: HttpStatusCode.BadRequest_400, body: `Body is required for this endpoint, { 'Content-Type': 'application/json' } header might be missing` };
       }
       const result = this._methodEndpoint.definition.body.safeParse(data.body);
       if (!result.success) {

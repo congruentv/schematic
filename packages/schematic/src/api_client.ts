@@ -151,5 +151,5 @@ export type ApiClientDef<ObjType extends object> = {
           : ObjType[Key];
 };
 
-export type ApiClient<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>> = ApiClientDef<InnerApiClient<TDef> & TDef>;
+export type ApiClient<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>> = Omit<ApiClientDef<InnerApiClient<TDef> & TDef>, "__CONTEXT__">;
 export const ApiClient: new <TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>>(contract: ApiContract<TDef>, clientGenericHandler: ClientHttpMethodEndpointHandler) => ApiClient<TDef> = InnerApiClient as any;

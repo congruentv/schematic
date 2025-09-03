@@ -15,6 +15,7 @@ export class PokemonService {
   getPokemon(id: number): Pokemon | null {
     this.logger.log(`Fetching Pokemon with ID: ${id}`);
     return {
+      tenantId: 'XXX',
       id,
       name: "Bulbasaur",
       type: "grass",

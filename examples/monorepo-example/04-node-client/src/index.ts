@@ -18,6 +18,8 @@ const client = createFetchClient(pokemonApiContract, {
   }
 });
 
+// client.__CONTEXT__
+
 console.log('Greeting...');
 const greetResponse = await client.greet.name('Ash').GET();
 if (greetResponse.code !== HttpStatusCode.OK_200) {

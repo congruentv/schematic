@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request } from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 
@@ -64,7 +64,7 @@ route(api, `GET /greet/:name/preferred/:salute`)
     });
   })
   .prepare(expressPreHandler(app, (req, res, next) => {
-    console.log('(1) cookies for', req.method, req.path, ' ====> ', req.cookies);
+    console.log(`(1) cookies for`, req.method, req.path, ' ====> ', req.cookies);
     next();
     console.log('(2) status code for', req.method, req.path, ' ====> ', res.statusCode);
   }))
@@ -128,18 +128,27 @@ register(pokemonPartialApi, 'PATCH /:id', async (req) => {
   return { code: HttpStatusCode.NoContent_204 };
 });
 
-register(pokemonPartialApi, 'POST ', async (req) => {
-  console.log('Headers:', req.headers);
-  const newPokemon = {
-    id: pokemons.length + 1,
-    ...req.body,
-  };
-  pokemons.push(newPokemon);
-  return {
-    code: HttpStatusCode.Created_201,
-    body: newPokemon.id,
-  };
-});
+type PokemonPostParams = Parameters<Exclude<typeof api.pokemon.POST.handler, null>>;
+type PokemonPostParamsInputBody = PokemonPostParams[0][`body`];
+
+route(pokemonPartialApi, 'POST ')
+  .prepare(expressPreHandler(app, (req: Request<any, any, PokemonPostParamsInputBody>, res, next) => {
+    console.log(`PREHANDLER for`, req.method, req.path, ' ====> ', req.body.name);
+    next();
+    console.log('PREHANDLER status code for', req.method, req.path, ' ====> ', res.statusCode);
+  }))
+  .register(async (req) => {
+    console.log('Headers:', req.headers);
+    const newPokemon = {
+      id: pokemons.length + 1,
+      ...req.body,
+    };
+    pokemons.push(newPokemon);
+    return {
+      code: HttpStatusCode.Created_201,
+      body: newPokemon.id,
+    };
+  });
 
 register(route(pokemonPartialApi, 'DELETE /:id'), async (req) => {
   const pokemon = pokemons.find(p => p.id.toString() === req.pathParams.id);
