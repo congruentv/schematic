@@ -5,7 +5,7 @@ import { ExtractEndpointFromPath, MethodFirstPath, route } from "./api_routing.j
 import { DIContainer } from "./di_container.js";
 import { IHttpMethodEndpointDefinition, ValidateHttpMethodEndpointDefinition } from "./http_method_endpoint.js";
 import { HttpMethodEndpointHandler } from "./http_method_endpoint_handler.js";
-import { ExtractTypedParamsFromMethodFirstPath } from "./typed_path_params.js";
+import { ExtractConcatenatedParamNamesFromMethodFirstPath } from "./typed_path_params.js";
 
 // Overload for registerMethodPathHandler
 export function register<
@@ -16,7 +16,7 @@ export function register<
 >(
   apiReg: ApiHandlersRegistry<TApiDef, TDIContainer, TPathParams>,
   path: TPath,
-  handler: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, `${TPathParams}${ExtractTypedParamsFromMethodFirstPath<TPath>}`, {}>
+  handler: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, `${TPathParams}${ExtractConcatenatedParamNamesFromMethodFirstPath<TPath>}`, {}>
 ): void;
 
 // Overload for registerEntryHandler
@@ -39,7 +39,7 @@ export function register<
 >(
   apiRegOrEndpoint: ApiHandlersRegistry<TApiDef, TDIContainer, TPathParams> | MethodEndpointHandlerRegistryEntry<TDef, TDIContainer, TPathParams>,
   pathOrHandler: TPath | HttpMethodEndpointHandler<TDef, TPathParams, {}>,
-  handler?: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, ExtractTypedParamsFromMethodFirstPath<TPath>, {}>
+  handler?: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, ExtractConcatenatedParamNamesFromMethodFirstPath<TPath>, {}>
 ): void {
   if (arguments.length === 3 && handler !== undefined) {
     registerMethodPathHandler(
@@ -64,7 +64,7 @@ function registerMethodPathHandler<
 >(
   apiReg: ApiHandlersRegistry<TApiDef, any, any>,
   path: TPath,
-  handler: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, `${TPathParams}${ExtractTypedParamsFromMethodFirstPath<TPath>}`, any>
+  handler: HttpMethodEndpointHandler<ExtractEndpointFromPath<TApiDef, TPath>, `${TPathParams}${ExtractConcatenatedParamNamesFromMethodFirstPath<TPath>}`, any>
 ) {
   const endpointEntry = route(apiReg, path);
   return registerEntryHandler(endpointEntry, handler);

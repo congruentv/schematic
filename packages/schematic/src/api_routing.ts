@@ -4,7 +4,7 @@ import { MethodEndpointHandlerRegistryEntry } from "./api_handlers_registry_entr
 import { DIContainer } from "./di_container.js";
 import { HttpMethodEndpoint } from "./http_method_endpoint.js";
 import { HttpMethod } from "./http_method_type.js";
-import { ExtractTypedParamsFromMethodFirstPath } from "./typed_path_params.js";
+import { ExtractConcatenatedParamNamesFromMethodFirstPath } from "./typed_path_params.js";
 
 export function route<
   TApiDef extends IApiContractDefinition & ValidateApiContractDefinition<TApiDef>,
@@ -14,7 +14,7 @@ export function route<
 >(
   apiReg: ApiHandlersRegistry<TApiDef, TDIContainer, TPathParams>,
   path: TPath
-): MethodEndpointHandlerRegistryEntry<ExtractEndpointFromPath<TApiDef, TPath>, TDIContainer, `${TPathParams}${ExtractTypedParamsFromMethodFirstPath<TPath>}`, {}> {
+): MethodEndpointHandlerRegistryEntry<ExtractEndpointFromPath<TApiDef, TPath>, TDIContainer, `${TPathParams}${ExtractConcatenatedParamNamesFromMethodFirstPath<TPath>}`, {}> {
   const pathStr = path as string;
   const spaceIndex = pathStr.indexOf(' ');
   if (spaceIndex === -1) {

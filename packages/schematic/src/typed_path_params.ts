@@ -22,18 +22,16 @@ export type TypedPathParams<TPathParams extends string> =
       ? { [K in ParamName]: string }
       : {};
 
-// TODO: rename to ExtractConcatenatedParamNamesFromMethodFirstPath
-export type ExtractTypedParamsFromMethodFirstPath<TPath extends string> = 
+export type ExtractConcatenatedParamNamesFromMethodFirstPath<TPath extends string> = 
   TPath extends `${string} ${infer PathPart}` // "METHOD /path"
-    ? ExtractTypeParamsFromPathSegments<PathPart>
+    ? ExtractConcatenatedParamNamesFromPathSegments<PathPart>
     : never;
 
-// TODO: rename to ExtractConcatenatedParamNamesFromPathSegments
-export type ExtractTypeParamsFromPathSegments<TPath extends string> = 
+export type ExtractConcatenatedParamNamesFromPathSegments<TPath extends string> = 
   TPath extends `/${infer Segment}/${infer Rest}` // "/segment/rest"
     ? Segment extends `:${infer ParamName}`
-      ? `:${ParamName}${ExtractTypeParamsFromPathSegments<`/${Rest}`> extends `:${infer RestParams}` ? `:${RestParams}` : ""}`
-      : ExtractTypeParamsFromPathSegments<`/${Rest}`>
+      ? `:${ParamName}${ExtractConcatenatedParamNamesFromPathSegments<`/${Rest}`> extends `:${infer RestParams}` ? `:${RestParams}` : ""}`
+      : ExtractConcatenatedParamNamesFromPathSegments<`/${Rest}`>
     : TPath extends `/${infer Segment}`
       ? Segment extends `:${infer ParamName}`
         ? `:${ParamName}`
@@ -42,7 +40,7 @@ export type ExtractTypeParamsFromPathSegments<TPath extends string> =
 
 export type ExtractConcatenatedParamNamesFromPath<TPath extends string> =
   TPath extends `${string} ${string}` // "METHOD /path"
-    ? ExtractTypedParamsFromMethodFirstPath<TPath>
+    ? ExtractConcatenatedParamNamesFromMethodFirstPath<TPath>
     : TPath extends `/${string}` // "/path"
-      ? ExtractTypeParamsFromPathSegments<TPath>
+      ? ExtractConcatenatedParamNamesFromPathSegments<TPath>
       : never;

@@ -3,7 +3,7 @@ import { ApiHandlersRegistry } from "./api_handlers_registry.js";
 import { MethodEndpointHandlerRegistryEntry } from "./api_handlers_registry_entry.js";
 import { PartialPath } from "./api_routing_partial.js";
 import { DIContainer } from "./di_container.js";
-import { ExtractTypeParamsFromPathSegments } from "./typed_path_params.js";
+import { ExtractConcatenatedParamNamesFromPathSegments } from "./typed_path_params.js";
 
 export function partial<
   TDIContainer extends DIContainer,
@@ -15,7 +15,7 @@ export function partial<
   path: TPath
 ): PartialPathResult<TApiDef, TPath> extends infer TPartialApi
   ? TPartialApi extends IApiContractDefinition & ValidateApiContractDefinition<TPartialApi>
-    ? ApiHandlersRegistry<TPartialApi, TDIContainer, ExtractTypeParamsFromPathSegments<TPath>>
+    ? ApiHandlersRegistry<TPartialApi, TDIContainer, ExtractConcatenatedParamNamesFromPathSegments<TPath>>
     : never
   : never {
   const pathSegments = (path as string).split('/').filter((segment: string) => segment.length > 0);
