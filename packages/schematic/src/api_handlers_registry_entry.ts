@@ -1,6 +1,7 @@
 import { DIContainer } from "./di_container.js";
 import { HttpMethodEndpoint, IHttpMethodEndpointDefinition, ValidateHttpMethodEndpointDefinition } from "./http_method_endpoint.js";
 import { HttpMethodEndpointHandler } from "./http_method_endpoint_handler.js";
+import { HttpResponseObject, isHttpResponseObject } from "./http_method_endpoint_handler_output.js";
 import { HttpStatusCode } from "./http_status_code.js";
 
 export type PrepareRegistryEntryCallback<
@@ -80,46 +81,24 @@ export class MethodEndpointHandlerRegistryEntry<
       throw new Error('Handler not set for this endpoint');
     }
 
-    if (this._methodEndpoint.definition.headers) {
-      if (
-        !('headers' in data)
-        || data.headers === null
-        || data.headers === undefined
-      ) {
-        return { code: HttpStatusCode.BadRequest_400, body: 'Headers are required for this endpoint' };
-      }
-      const result = this._methodEndpoint.definition.headers.safeParse(data.headers);
-      if (!result.success) {
-        return { code: HttpStatusCode.BadRequest_400, body: JSON.parse(result.error.message) };
-      }
+    let badRequestResponse: HttpResponseObject | null = null;
+
+    const headers = parseRequestDefinitionField(this._methodEndpoint.definition, 'headers', data);
+    if (isHttpResponseObject(headers)) {
+      badRequestResponse = headers;
+      return badRequestResponse;
     }
 
-    if (this._methodEndpoint.definition.query) {
-      if (
-        !('query' in data)
-        || data.query === null
-        || data.query === undefined
-      ) {
-        return { code: HttpStatusCode.BadRequest_400, body: `Query is required for this endpoint` };
-      }
-      const result = this._methodEndpoint.definition.query.safeParse(data.query);
-      if (!result.success) {
-        return { code: HttpStatusCode.BadRequest_400, body: JSON.parse(result.error.message) };
-      }
+    const query = parseRequestDefinitionField(this._methodEndpoint.definition, 'query', data);
+    if (isHttpResponseObject(query)) {
+      badRequestResponse = query;
+      return badRequestResponse;
     }
 
-    if (this._methodEndpoint.definition.body) {
-      if (
-        !('body' in data)
-        || data.body === null
-        || data.body === undefined
-      ) {
-        return { code: HttpStatusCode.BadRequest_400, body: `Body is required for this endpoint, { 'Content-Type': 'application/json' } header might be missing` };
-      }
-      const result = this._methodEndpoint.definition.body.safeParse(data.body);
-      if (!result.success) {
-        return { code: HttpStatusCode.BadRequest_400, body: JSON.parse(result.error.message) };
-      }
+    const body = parseRequestDefinitionField(this._methodEndpoint.definition, 'body', data);
+    if (isHttpResponseObject(body)) {
+      badRequestResponse = body;
+      return badRequestResponse;
     }
 
     const path = `/${this._methodEndpoint.pathSegments.map(segment => 
@@ -133,11 +112,44 @@ export class MethodEndpointHandlerRegistryEntry<
       path,
       genericPath: this._methodEndpoint.genericPath,
       pathSegments: this._methodEndpoint.pathSegments,
-      headers: data.headers,
+      headers,
       pathParams: data.pathParams as any, 
-      query: data.query as any, 
-      body: data.body as any,
+      query,
+      body,
       injected: this._injection(this._dicontainer.createScope()) as any,
     });
   }
+}
+
+function parseRequestDefinitionField<
+  TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
+  T extends Record<string, any>
+>(
+  definition: TDef,
+  key: 'headers' | 'query' | 'body',
+  data: T
+): any {
+  if (definition[key]) {
+    if (
+      !(key in data)
+      || data[key as keyof T] === null
+      || data[key as keyof T] === undefined
+    ) {
+      return { 
+        code: HttpStatusCode.BadRequest_400, 
+        body: `${key} are required for this endpoint` + (
+          key === 'body' ? ", { 'Content-Type': 'application/json' } header might be missing" : ''
+        )
+      };
+    }
+    const result = definition[key].safeParse(data[key as keyof T]);
+    if (!result.success) {
+      return { 
+        code: HttpStatusCode.BadRequest_400, 
+        body: result.error.issues
+      };
+    }
+    return result.data ?? null;
+  }
+  return null;
 }

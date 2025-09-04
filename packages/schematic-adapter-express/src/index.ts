@@ -30,32 +30,18 @@ export function createExpressRegistry<
       const { genericPath } = entry.methodEndpoint;
       const method = entry.methodEndpoint.method.toLowerCase() as LowerCasedHttpMethod;
       app[method](genericPath, async (req, res) => {
-        const pathParams = req.params;
-        const query = req.query;
-        const body = req.body;
-        const headers = JSON.parse(JSON.stringify(req.headers)); // TODO
-        const result = await entry.trigger({
-          headers,
-          pathParams,
-          query,
-          body,
-        });
+        // @ts-ignore
+        req.pathParams = req.params;
+        const result = await entry.trigger(req as any);
         res.status(result.code).json(result.body);
       });
     },
     middlewareHandlerRegisteredCallback: (middlewarePath, handler) => {
       console.log('Registering Express middleware:', middlewarePath);
       app.use(middlewarePath, (req, _res, next) => {
-        const pathParams = req.params;
-        const query = req.query;
-        const body = req.body;
-        const headers = JSON.parse(JSON.stringify(req.headers)); // TODO
-        handler({
-          headers,
-          pathParams,
-          query,
-          body,
-        }, next);
+        // @ts-ignore
+        req.pathParams = req.params;
+        handler(req, next);
       });
     }
   });

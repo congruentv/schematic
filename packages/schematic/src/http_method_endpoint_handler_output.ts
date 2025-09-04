@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { IHttpMethodEndpointDefinition } from "./http_method_endpoint.js";
-import { HttpStatusCode } from './http_status_code.js';
+import { HttpStatusCode, isHttpStatusCode } from './http_status_code.js';
 import { HttpMethodEndpointResponse } from './http_method_endpoint_response.js';
 
 export type HttpMethodEndpointHandlerOutput<TEndpointDefinition extends IHttpMethodEndpointDefinition> = {
@@ -25,4 +25,18 @@ type CreateHandlerOutput<THttpStatusCode extends HttpStatusCode, TRespDef> =
 export type ClientHttpMethodEndpointHandlerOutput = {
   code: HttpStatusCode;
   body: any;
+}
+
+export type HttpResponseObject = {
+  code: HttpStatusCode;
+  body?: any;
+}
+
+export function isHttpResponseObject(obj: any): obj is HttpResponseObject {
+  return (
+    obj !== null
+    && typeof obj === 'object' 
+    && 'code' in obj
+    && isHttpStatusCode(obj.code)
+  );
 }

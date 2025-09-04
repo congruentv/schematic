@@ -21,3 +21,7 @@ export enum HttpStatusCode {
   ServiceUnavailable_503 = 503,
   GatewayTimeout_504 = 504,
 }
+
+export function isHttpStatusCode(value: any): value is HttpStatusCode {
+  return value in HttpStatusCode; // works only if HttpStatusCode is NOT a const enum
+}

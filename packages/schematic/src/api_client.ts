@@ -1,6 +1,6 @@
 import { ApiContract, IApiContractDefinition, ValidateApiContractDefinition } from "./api_contract.js";
 import { HttpMethodCallFunc,  } from './api_client_http_method_call.js';
-import { HttpMethodEndpoint } from './http_method_endpoint.js';
+import { HttpMethodEndpoint, IHttpMethodEndpointDefinition, ValidateHttpMethodEndpointDefinition } from './http_method_endpoint.js';
 import { ClientHttpMethodEndpointHandler } from "./http_method_endpoint_handler.js";
 
 export function createClient<
@@ -67,53 +67,15 @@ class InnerApiClient<TDef extends IApiContractDefinition & ValidateApiContractDe
         delete currObj[key];
         InnerApiClient._initialize(client, val, clientGenericHandler);
       } else if (val instanceof HttpMethodEndpoint) {
-        currObj[key] = (req: never | { headers: Record<string, string>; query: Record<string, any>; body: any }) => {
+        currObj[key] = (req: never | { pathParams: Record<string, string>; headers: Record<string, string>; query: Record<string, any>; body: any }) => {
           const pathParams = { ...client.__CONTEXT__.pathParameters };
           
           // Clear & reinitialize client context right before making the call
           client.__CONTEXT__ = InnerApiClient._initNewContext(); 
 
-          if (val.definition.headers) {
-            if (
-              !('headers' in req)
-              || req.headers === null
-              || req.headers === undefined
-            ) {
-              throw new Error('Headers are required for this endpoint');
-            }
-            const result = val.definition.headers.safeParse(req.headers);
-            if (!result.success) {
-              throw result.error;
-            }
-          }
-
-          if (val.definition.query) {
-            if (
-              !('query' in req)
-              || req.query === null
-              || req.query === undefined
-            ) {
-              throw new Error('Query is required for this endpoint');
-            }
-            const result = val.definition.query.safeParse(req.query);
-            if (!result.success) {
-              throw result.error;
-            }
-          }
-
-          if (val.definition.body) {
-            if (
-              !('body' in req)
-              || req.body === null
-              || req.body === undefined
-            ) {
-              throw new Error('Body is required for this endpoint');
-            }
-            const result = val.definition.body.safeParse(req.body);
-            if (!result.success) {
-              throw result.error;
-            }
-          }
+          const headers = parseRequestDefinitionField(val.definition, 'headers', req);
+          const query = parseRequestDefinitionField(val.definition, 'query', req);
+          const body = parseRequestDefinitionField(val.definition, 'body', req);
 
           const path = `/${val.pathSegments.map(segment => 
               segment.startsWith(':') 
@@ -125,10 +87,10 @@ class InnerApiClient<TDef extends IApiContractDefinition & ValidateApiContractDe
             pathSegments: val.pathSegments,
             genericPath: val.genericPath,
             path,
-            headers: req?.headers ?? null,
+            headers,
             pathParams,
-            query: req?.query ?? null,
-            body: req?.body ?? null,
+            query,
+            body,
           });
         };
       } else if (typeof val === 'object' && val !== null) {
@@ -153,3 +115,28 @@ export type ApiClientDef<ObjType extends object> = {
 
 export type ApiClient<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>> = Omit<ApiClientDef<InnerApiClient<TDef> & TDef>, "__CONTEXT__">;
 export const ApiClient: new <TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>>(contract: ApiContract<TDef>, clientGenericHandler: ClientHttpMethodEndpointHandler) => ApiClient<TDef> = InnerApiClient as any;
+
+function parseRequestDefinitionField<
+  TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
+  T extends Record<string, any>
+>(
+  definition: TDef,
+  key: 'headers' | 'query' | 'body',
+  data: T
+): any {
+  if (definition[key]) {
+    if (
+      !(key in data)
+      || data[key as keyof T] === null
+      || data[key as keyof T] === undefined
+    ) {
+      throw new Error(`${key} are required for this endpoint`);
+    }
+    const result = definition[key].safeParse(data[key as keyof T]);
+    if (!result.success) {
+      throw new Error(`Validation for '${key}' failed`, { cause: result.error });
+    }
+    return result.data ?? null;
+  }
+  return null;
+}

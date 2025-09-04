@@ -6,11 +6,13 @@ import {
   HttpStatusCode as s
 } from "@congruentv/schematic";
 
+export const BaseRequestHeadersSchema = z.object({
+  'x-tenant-id': z.string(),
+});
+
 export const BaseRequestBodySchema = z.object({
   tenantId: z.string(),
 });
-
-export type BaseRequestBody = z.output<typeof BaseRequestBodySchema>;
 
 export const PokemonSchema = BaseRequestBodySchema.extend({
   id: z.number().int().min(1),
@@ -44,6 +46,7 @@ export const NotFoundSchema = z.object({
 export const v1_pokemons = apiContract({
   pokemons: {
     GET: endpoint({
+      headers: BaseRequestHeadersSchema,
       query: z.object({
         take: z.union([z.number(), z.string()]) // z.input
                 .transform((v) => Number(v))
@@ -65,9 +68,7 @@ export const v1_pokemons = apiContract({
       }
     }),
     POST: endpoint({
-      headers: z.object({
-        'x-custom-header': z.string(),
-      }),
+      headers: BaseRequestHeadersSchema,
       body: CreatePokemonSchema,
       responses: {
         [s.Created_201]: response({ body: z.number().int() }),
@@ -75,18 +76,21 @@ export const v1_pokemons = apiContract({
     }),
     [':id']: {
       GET: endpoint({
+        headers: BaseRequestHeadersSchema,
         responses: {
           [s.OK_200]: response({ body: PokemonSchema }),
           [s.NotFound_404]: response({ body: NotFoundSchema }),
         },
       }),
       DELETE: endpoint({
+        headers: BaseRequestHeadersSchema,
         responses: {
           [s.NoContent_204]: response({  }),
           [s.NotFound_404]: response({ body: NotFoundSchema }),
         }
       }),
       PUT: endpoint({
+        headers: BaseRequestHeadersSchema,
         body: PokemonSchema,
         responses: {
           [s.OK_200]: response({ body: PokemonSchema }),
@@ -94,6 +98,7 @@ export const v1_pokemons = apiContract({
         }
       }),
       PATCH: endpoint({
+        headers: BaseRequestHeadersSchema,
         body: PokemonSchema.partial(),
         responses: {
           [s.NoContent_204]: response({  }),

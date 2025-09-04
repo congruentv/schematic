@@ -63,6 +63,7 @@ export class HttpMethodEndpoint<const TDef extends IHttpMethodEndpointDefinition
   /** @internal */
   _cloneWith(path: readonly string[], method: string): HttpMethodEndpoint<TDef> {
     const result = new HttpMethodEndpoint<TDef>({
+      headers: !!this._definition.headers ? this._definition.headers.clone() : undefined,
       query: !!this._definition.query ? this._definition.query.clone() : undefined,
       body: !!this._definition.body ? this._definition.body.clone() : undefined,
       responses: Object.fromEntries(

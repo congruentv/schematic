@@ -7,6 +7,7 @@ import { ExtractConcatenatedParamNamesFromPath, TypedPathParams } from "./typed_
 import { HttpMethod } from "./http_method_type.js";
 
 export type MiddlewareHandlerInputSchemas = {
+  headers?: z.ZodType,
   query?: z.ZodType,
   body?: z.ZodType
 };
@@ -19,7 +20,7 @@ export type MiddlewareHandlerInput<
   pathSegments: readonly string[];
   path: string;
   genericPath: string;
-  headers: Record<string, string>;
+  headers: InputSchemas['headers'] extends z.ZodType ? z.output<InputSchemas['headers']> : Record<string, string>; // z.output because the handler receives the parsed input
   pathParams: TypedPathParams<TPathParams>;
   query: InputSchemas['query'] extends z.ZodType ? z.output<InputSchemas['query']> : null; // z.output because the handler receives the parsed input
   body: InputSchemas['body'] extends z.ZodType ? z.output<InputSchemas['body']> : null; // z.output because the handler receives the parsed input

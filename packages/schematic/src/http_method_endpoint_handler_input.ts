@@ -12,7 +12,7 @@ export type HttpMethodEndpointHandlerInput<
   pathSegments: readonly string[];
   path: string;
   genericPath: string;
-  headers: Record<string, string>;
+  headers: TEndpointDefinition['headers'] extends z.ZodType ? z.output<TEndpointDefinition['headers']> : Record<string, string>; // z.output because the handler receives the parsed input
   pathParams: TypedPathParams<TPathParams>;
   query: TEndpointDefinition['query'] extends z.ZodType ? z.output<TEndpointDefinition['query']> : null; // z.output because the handler receives the parsed input
   body: TEndpointDefinition['body'] extends z.ZodType ? z.output<TEndpointDefinition['body']> : null; // z.output because the handler receives the parsed input

@@ -1,6 +1,6 @@
 import { route, middleware, HttpStatusCode as s } from "@congruentv/schematic";
 import { pokedexApiReg as reg } from "../setup.js";
-import { BaseRequestBodySchema } from "@pokedex/contract/src/pokemons/v1.js";
+import { BaseRequestBodySchema, BaseRequestHeadersSchema } from "@pokedex/contract/src/pokemons/v1.js";
 
 // const mdlw = middleware(reg, '/api/v1/pokemons/:id');
 
@@ -8,9 +8,11 @@ import { BaseRequestBodySchema } from "@pokedex/contract/src/pokemons/v1.js";
 
 middleware(reg, '/api/v1/pokemons') // /:id
   .register({
-    body: BaseRequestBodySchema
+    headers: BaseRequestHeadersSchema,
+    body: BaseRequestBodySchema.optional()
   },
   (req, next) => {
+    console.log('tenant id from header', req.headers['x-tenant-id']);
     //req.pathParams.id;
     if (req.body) {
       console.log('tenant id', req.body.tenantId);
@@ -26,6 +28,7 @@ route(reg, 'GET /api/v1/pokemons/:id')
     pokemonSvc: c.getPokemonSvc()
   }))
   .register(async (req) => {
+    console.log(`tenant id from x-tenant-id header = `, req.headers["x-tenant-id"]);
     // console.log('Fetching Pokemon...')
     const pokemon = req.injected.pokemonSvc.getPokemon(parseInt(req.pathParams.id, 10));
     if (!pokemon) {
@@ -48,7 +51,7 @@ route(reg, 'GET /api/v1/pokemons/:id')
 route(reg, 'POST /api/v1/pokemons')
   .register(async (req) => {
     // TODO: typesafe req.headers, now is :Record<string, string>
-    req.headers['x-custom-header']
+    console.log('ROUTE HANDLER: tenant id from x-tenant-id header = ', req.headers['x-tenant-id']);
     req.body.tenantId
     return {
       code: s.Created_201,

@@ -21,7 +21,11 @@ describe('My Test Suite', () => {
   const client = createInProcApiClient(pokedexApiContract, testContainer, pokedexApiReg);
 
   test('first', async () => {
-    const result = await client.api.v1.pokemons.id('25').GET();
+    const result = await client.api.v1.pokemons.id('25').GET({
+      headers: {
+        "x-tenant-id": "XXX"
+      }
+    });
     expect(result.code).toBe(HttpStatusCode.OK_200);
     if (result.code === HttpStatusCode.OK_200) {
       expect(result.body).toEqual({
