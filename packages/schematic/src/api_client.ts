@@ -73,15 +73,16 @@ class InnerApiClient<TDef extends IApiContractDefinition & ValidateApiContractDe
           // Clear & reinitialize client context right before making the call
           client.__CONTEXT__ = InnerApiClient._initNewContext(); 
 
-          const headers = parseRequestDefinitionField(val.definition, 'headers', req);
-          const query = parseRequestDefinitionField(val.definition, 'query', req);
-          const body = parseRequestDefinitionField(val.definition, 'body', req);
+          const headers = clientParseRequestDefinitionField(val.definition, 'headers', req);
+          const query = clientParseRequestDefinitionField(val.definition, 'query', req);
+          const body = clientParseRequestDefinitionField(val.definition, 'body', req);
 
           const path = `/${val.pathSegments.map(segment => 
               segment.startsWith(':') 
               ? (pathParams[segment.slice(1)] ?? '?') 
               : segment
             ).join('/')}`;
+            
           return clientGenericHandler({
             method: val.method,
             pathSegments: val.pathSegments,
@@ -116,7 +117,7 @@ export type ApiClientDef<ObjType extends object> = {
 export type ApiClient<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>> = Omit<ApiClientDef<InnerApiClient<TDef> & TDef>, "__CONTEXT__">;
 export const ApiClient: new <TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>>(contract: ApiContract<TDef>, clientGenericHandler: ClientHttpMethodEndpointHandler) => ApiClient<TDef> = InnerApiClient as any;
 
-function parseRequestDefinitionField<
+function clientParseRequestDefinitionField<
   TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
   T extends Record<string, any>
 >(
@@ -130,7 +131,11 @@ function parseRequestDefinitionField<
       || data[key as keyof T] === null
       || data[key as keyof T] === undefined
     ) {
-      throw new Error(`${key} are required for this endpoint`);
+      // definition[key].isOptional was deprecated in favour of safeParse with success check
+      if (!definition[key].safeParse(data[key as keyof T]).success) {
+        throw new Error(`${key} are required for this endpoint`);
+      }
+      return null;
     }
     const result = definition[key].safeParse(data[key as keyof T]);
     if (!result.success) {

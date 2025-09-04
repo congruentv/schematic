@@ -17,8 +17,8 @@ export function createInProcApiClient<
     handlerRegisteredCallback: (_entry) => {
       //console.log('Registering TEST route:', entry.methodEndpoint.genericPath);
     },
-    middlewareHandlerRegisteredCallback: (_middlewarePath, _handler) => {
-      //console.log('Registering TEST middleware:', _middlewarePath);
+    middlewareHandlerRegisteredCallback: (_entry) => {
+      //console.log('Registering TEST middleware:', entry.genericPath);
     },
   });
 
@@ -26,7 +26,6 @@ export function createInProcApiClient<
     if (!entry.handler) {
       return;
     }
-    // @ts-ignore - Type instantiation is excessively deep and possibly infinite.ts(2589)
     const rt = route(testApiReg, `${entry.methodEndpoint.method} ${entry.methodEndpoint.genericPath}` as any);
     rt.inject(entry.injection)
       .register(entry.handler);

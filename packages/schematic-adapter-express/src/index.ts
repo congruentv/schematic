@@ -13,7 +13,8 @@ import {
   PrepareRegistryEntryCallback,
   IHttpMethodEndpointDefinition,
   ValidateHttpMethodEndpointDefinition,
-  DIContainer
+  DIContainer,
+  isHttpResponseObject
 } from '@congruentv/schematic';
 
 export function createExpressRegistry<
@@ -36,12 +37,15 @@ export function createExpressRegistry<
         res.status(result.code).json(result.body);
       });
     },
-    middlewareHandlerRegisteredCallback: (middlewarePath, handler) => {
-      console.log('Registering Express middleware:', middlewarePath);
-      app.use(middlewarePath, (req, _res, next) => {
+    middlewareHandlerRegisteredCallback: (entry) => {
+      console.log('Registering Express middleware:', entry.genericPath);
+      app.use(entry.genericPath, async (req, res, next) => {
         // @ts-ignore
         req.pathParams = req.params;
-        handler(req, next);
+        const haltResponse = await entry.trigger(req as any, next);
+        if (haltResponse && isHttpResponseObject(haltResponse)) {
+          res.status(haltResponse.code).json(haltResponse.body);
+        }
       });
     }
   });

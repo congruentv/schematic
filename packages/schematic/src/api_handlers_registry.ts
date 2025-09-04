@@ -50,7 +50,7 @@ export interface IRegistrySettings<
   TDIContainer extends DIContainer
 > {
   handlerRegisteredCallback: GenericOnHandlerRegisteredCallback<TDIContainer>,
-  middlewareHandlerRegisteredCallback: OnMiddlewareHandlerRegisteredCallback
+  middlewareHandlerRegisteredCallback: OnMiddlewareHandlerRegisteredCallback<TDIContainer, unknown>
 }
 
 class InnerApiHandlersRegistry<
@@ -118,7 +118,14 @@ export type ApiHandlersRegistry<
   TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>, 
   TDIContainer extends DIContainer,
   TPathParams extends string = "",
-> = Omit<ApiHandlersRegistryDef<InnerApiHandlersRegistry<TDef, TDIContainer> & TDef, TDIContainer, TPathParams>, '_middlewareRegistry'>;
+> = Omit<
+  ApiHandlersRegistryDef<InnerApiHandlersRegistry<TDef, TDIContainer> & TDef, TDIContainer, TPathParams>, 
+  '_middlewareRegistry' 
+  // if not ommitted, the following typescript error occurs
+  // error: Type instantiation is excessively deep and possibly infinite.ts(2589)
+  // reason: because _middlewareRegistry: MiddlewareHandlersRegistry<TDIContainer extends DIContainer> 
+  // contains a generic property (public readonly dicontainer: TDIContainer;)
+>;
 
 export const ApiHandlersRegistry: new <
   TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>, 

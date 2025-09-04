@@ -26,3 +26,4 @@ Typescript schema-first tooling for modern typed REST APIs and Ops.
 - route handler: async (req, ctx: { injected, allHeaders, express: { request, response, next }, awsApiGw: ..., etc. }) => { ... }
 - remove req.injected
 - within trigger, validate returned object from route/middleware handler
+- inproc does not execute middleware handlers

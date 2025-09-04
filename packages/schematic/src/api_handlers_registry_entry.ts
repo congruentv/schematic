@@ -116,7 +116,7 @@ export class MethodEndpointHandlerRegistryEntry<
       pathParams: data.pathParams as any, 
       query,
       body,
-      injected: this._injection(this._dicontainer.createScope()) as any,
+      injected: this._injection(this._dicontainer.createScope()),
     });
   }
 }
@@ -135,12 +135,16 @@ function parseRequestDefinitionField<
       || data[key as keyof T] === null
       || data[key as keyof T] === undefined
     ) {
-      return { 
-        code: HttpStatusCode.BadRequest_400, 
-        body: `${key} are required for this endpoint` + (
-          key === 'body' ? ", { 'Content-Type': 'application/json' } header might be missing" : ''
-        )
-      };
+      // definition[key].isOptional was deprecated in favour of safeParse with success check
+      if (!definition[key].safeParse(data[key as keyof T]).success) {
+        return { 
+          code: HttpStatusCode.BadRequest_400, 
+          body: `'${key}' is required for this endpoint` + (
+            key === 'body' ? ", { 'Content-Type': 'application/json' } header might be missing" : ''
+          )
+        };
+      }
+      return null;
     }
     const result = definition[key].safeParse(data[key as keyof T]);
     if (!result.success) {

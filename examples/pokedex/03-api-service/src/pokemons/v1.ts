@@ -7,12 +7,15 @@ import { BaseRequestBodySchema, BaseRequestHeadersSchema } from "@pokedex/contra
 // mdlw
 
 middleware(reg, '/api/v1/pokemons') // /:id
+  .inject((c) => ({
+    loggerSvc: c.getLoggerSvc()
+  }))
   .register({
     headers: BaseRequestHeadersSchema,
     body: BaseRequestBodySchema.optional()
-  },
-  (req, next) => {
-    console.log('tenant id from header', req.headers['x-tenant-id']);
+  }, async (req, next) => {
+    req.injected.loggerSvc.log(`tenant id from header = ${req.headers['x-tenant-id']}`);
+    //return { code: s.OK_200, body: 'halted' };
     //req.pathParams.id;
     if (req.body) {
       console.log('tenant id', req.body.tenantId);
