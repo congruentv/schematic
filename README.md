@@ -21,9 +21,7 @@ Typescript schema-first tooling for modern typed REST APIs and Ops.
 - https://medium.com/@nik14gos/express-js-route-validation-with-zod-26cafe5f6b3d
 
 ### TODO:
-- middleware handler might return a response, halting execution 
-  - e.g. returns 401 Unautorized when Authorization header is not valid
+- inproc does not execute middleware handlers
 - route handler: async (req, ctx: { injected, allHeaders, express: { request, response, next }, awsApiGw: ..., etc. }) => { ... }
 - remove req.injected
-- within trigger, validate returned object from route/middleware handler
-- inproc does not execute middleware handlers
+- within trigger, validate returned object from route/middleware handler (optional setting)
