@@ -25,3 +25,9 @@ Typescript schema-first tooling for modern typed REST APIs and Ops.
 - route handler: async (req, ctx: { injected, allHeaders, express: { request, response, next }, awsApiGw: ..., etc. }) => { ... }
 - remove req.injected
 - within trigger, validate returned object from route/middleware handler (optional setting)
+
+### ideas:
+- commands and queries => event sourcing + event replay
+  - interface ICommand< TEndpointDefinition > : { map(endpDef); executeAsync(): Promise< TMapToResponses >; }
+  - handleCommand(new CreatePokemonCmd())
+  - handleQuery(new ListAllPokemons())
