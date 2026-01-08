@@ -2,10 +2,28 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "@pokedex/api-service attach debug",
+      "type": "node",
+      "request": "attach",
+      "port": 10000,
+      "restart": true,
+      "skipFiles": ["<node_internals>/**"],
+      "cwd": "${workspaceFolder}"
+    },
+    {
       "name": "examples/monorepo/api-service attach debug",
       "type": "node",
       "request": "attach",
       "port": 10000,
+      "restart": true,
+      "skipFiles": ["<node_internals>/**"],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "examples/monorepo/node-client attach debug",
+      "type": "node",
+      "request": "attach",
+      "port": 9999,
       "restart": true,
       "skipFiles": ["<node_internals>/**"],
       "cwd": "${workspaceFolder}"

@@ -6,10 +6,27 @@ import { HttpStatusCode } from "./http_status_code.js";
 export function createRegistry<
   TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>
 >(
-  contract: ApiContract<TDef>
+  contract: ApiContract<TDef>,
+  callback: GenericOnHandlerRegisteredCallback
 ) {
-  return new ApiHandlersRegistry<TDef>(contract);
+  return new ApiHandlersRegistry<TDef>(contract, callback);
 }
+
+export type PrepareRegistryEntryCallback<
+  TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
+  TPathParams extends string
+> = (entry: MethodEndpointHandlerRegistryEntry<TDef, TPathParams>) => void;
+
+export type OnHandlerRegisteredCallback<
+  TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
+  TPathParams extends string
+> = (entry: MethodEndpointHandlerRegistryEntry<TDef, TPathParams>) => void;
+
+export type GenericOnHandlerRegisteredCallback = 
+  OnHandlerRegisteredCallback<
+    IHttpMethodEndpointDefinition 
+    & ValidateHttpMethodEndpointDefinition<IHttpMethodEndpointDefinition>, string
+  >;
 
 export class MethodEndpointHandlerRegistryEntry<
   TDef extends IHttpMethodEndpointDefinition & ValidateHttpMethodEndpointDefinition<TDef>,
@@ -25,8 +42,21 @@ export class MethodEndpointHandlerRegistryEntry<
   }
 
   private _handler: HttpMethodEndpointHandler<TDef, TPathParams> | null = null;
-  handle(handler: HttpMethodEndpointHandler<TDef, TPathParams>): void {
+  register(handler: HttpMethodEndpointHandler<TDef, TPathParams>): void {
     this._handler = handler;
+    if (this._onHandlerRegisteredCallback) {
+      this._onHandlerRegisteredCallback(this);
+    }
+  }
+
+  private _onHandlerRegisteredCallback: OnHandlerRegisteredCallback<TDef, TPathParams> | null = null;
+  _onHandlerRegistered(callback: OnHandlerRegisteredCallback<TDef, TPathParams>): void {
+    this._onHandlerRegisteredCallback = callback;
+  }
+
+  prepare(callback: PrepareRegistryEntryCallback<TDef, TPathParams>) {
+    callback(this);
+    return this;
   }
 
   async trigger(data: { 
@@ -73,7 +103,7 @@ export class MethodEndpointHandlerRegistryEntry<
         || data.body === null
         || data.body === undefined
       ) {
-        throw new Error('Body is required for this endpoint');
+        throw new Error(`Body is required for this endpoint, { 'Content-Type': 'application/json' } header might be missing`);
       }
       const result = this._methodEndpoint.definition.body.safeParse(data.body);
       if (!result.success) {
@@ -101,26 +131,32 @@ export class MethodEndpointHandlerRegistryEntry<
 }
 
 class InnerApiHandlersRegistry<TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>> {
-  constructor(contract: ApiContract<TDef>) {
-    const clonedDefinition = contract._cloneDefinition();
+  constructor(
+    contract: ApiContract<TDef>, 
+    callback: GenericOnHandlerRegisteredCallback
+  ) {
+    const clonedDefinition = contract.cloneDefinition();
 
     const proto = { ...InnerApiHandlersRegistry.prototype };
     Object.assign(proto, Object.getPrototypeOf(clonedDefinition));
     Object.setPrototypeOf(this, proto);
     Object.assign(this, clonedDefinition);
 
-    InnerApiHandlersRegistry._implement(this);
+    InnerApiHandlersRegistry._implement(this, callback);
   }
 
   private static _implement(
-    currObj: any
+    currObj: any,
+    callback: GenericOnHandlerRegisteredCallback
   ): void {
     for (const key of Object.keys(currObj)) {
       const value = currObj[key];
       if (value instanceof HttpMethodEndpoint) {
-        currObj[key] = new MethodEndpointHandlerRegistryEntry(value);
+        const entry = new MethodEndpointHandlerRegistryEntry(value);
+        entry._onHandlerRegistered(callback);
+        currObj[key] = entry;
       } else if (typeof value === "object" && value !== null) {
-        InnerApiHandlersRegistry._implement(value);
+        InnerApiHandlersRegistry._implement(value, callback);
       }
     }
   }
@@ -151,4 +187,7 @@ export type ApiHandlersRegistry<
 export const ApiHandlersRegistry: new <
   TDef extends IApiContractDefinition & ValidateApiContractDefinition<TDef>, 
   TPathParams extends string = ""
->(contract: ApiContract<TDef>) => ApiHandlersRegistry<TDef, TPathParams> = InnerApiHandlersRegistry as any;
+>(
+  contract: ApiContract<TDef>, 
+  callback: GenericOnHandlerRegisteredCallback
+) => ApiHandlersRegistry<TDef, TPathParams> = InnerApiHandlersRegistry as any;
